@@ -1,0 +1,602 @@
+package gr
+
+import (
+	"bufio"
+	"net"
+	"time"
+)
+
+type Pipeline struct {
+	cmdsSize  int
+	cmdsQueue queue
+	respQueue queue
+	redis     *Redis
+	err       []error
+}
+
+//////////
+//TRANSACTION
+func (p *Pipeline) Multi() *RespString {
+	return p.enqueueStr(rMulti())
+}
+
+func (p *Pipeline) Exec() *RespString {
+	return p.enqueueStr(rExec())
+}
+
+func (p *Pipeline) Discard() *RespString {
+	return p.enqueueStr(rDiscard())
+}
+
+////////
+//KEYS
+///////
+
+func (p *Pipeline) Del(keys ...string) *RespInt {
+
+	rs, err := rDel(keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) Dump(key string) *RespString {
+	return p.enqueueStr(rDump(key))
+}
+
+func (p *Pipeline) Exists(key string) *RespBool {
+	return p.enqueueBool(rExists(key))
+}
+
+func (p *Pipeline) Expire(key string, seconds int) *RespBool {
+	return p.enqueueBool(rExpire(key, seconds))
+}
+
+func (p *Pipeline) ExpireAt(key string, date time.Time) *RespBool {
+	return p.enqueueBool(rExpireAt(key, date))
+}
+
+func (p *Pipeline) Keys(pattern string) *RespStringArray {
+	return p.enqueueStrArray(rKeys(pattern))
+}
+
+func (p *Pipeline) Migrate(
+	host string,
+	port int,
+	key string,
+	destinationDB string,
+	timeout int,
+	copy bool,
+	replace bool) *RespString {
+
+	return p.enqueueStr(rMigrate(host, port, key, destinationDB, timeout, copy, replace))
+}
+
+func (p *Pipeline) Move(key string, db string) *RespBool {
+	return p.enqueueBool(rMove(key, db))
+}
+
+func (p *Pipeline) ObjectEncoding(arguments ...string) *RespString {
+	return p.enqueueStr(rObjectEncoding(arguments...))
+}
+
+func (p *Pipeline) ObjectRefCount(arguments ...string) *RespInt {
+	return p.enqueueInt(rObjectRefCount(arguments...))
+}
+
+func (p *Pipeline) ObjectIdleTime(arguments ...string) *RespInt {
+	return p.enqueueInt(rObjectIdleTime(arguments...))
+}
+
+func (p *Pipeline) Persist(key string) *RespBool {
+	return p.enqueueBool(rPersist(key))
+}
+
+func (p *Pipeline) PExpire(key string, milliseconds int) *RespBool {
+	return p.enqueueBool(rPExpire(key, milliseconds))
+}
+
+func (p *Pipeline) PExpireAt(key string, date time.Time) *RespBool {
+	return p.enqueueBool(rPExpireAt(key, date))
+}
+
+func (p *Pipeline) PTTL(key string) *RespInt {
+	return p.enqueueInt(rPTTL(key))
+}
+
+func (p *Pipeline) RandomKey() *RespString {
+	return p.enqueueStr(rRandomKey())
+}
+
+func (p *Pipeline) Rename(key string, newKey string) *RespString {
+	return p.enqueueStr(rRename(key, newKey))
+}
+
+func (p *Pipeline) RenameNx(key string, newKey string) *RespString {
+	return p.enqueueStr(rRenameNx(key, newKey))
+}
+
+func (p *Pipeline) Restore(key string, ttl int, value string, replace bool) *RespString {
+	return p.enqueueStr(rRestore(key, ttl, value, replace))
+}
+
+/*
+func (p *Pipeline) Scan(cursor int, scanParams *ScanParams) (int64, []string, error) {
+	s, err := r.writeReadStrArray(rScan(cursor, scanParams))
+	c, sc, err := scanGeneric(s, err)
+
+	return c, sc, err
+}
+*/
+
+func (p *Pipeline) Sort(key string, sortParams *SortParams) *RespStringArray {
+	return p.enqueueStrArray(rSort(key, sortParams))
+}
+
+func (p *Pipeline) SortStore(key string, destination string, sortParams *SortParams) *RespInt {
+	return p.enqueueInt(rSortStore(key, destination, sortParams))
+}
+
+func (p *Pipeline) TTL(key string) *RespInt {
+	return p.enqueueInt(rTTL(key))
+}
+
+func (p *Pipeline) Type(key string) *RespString {
+	return p.enqueueStr(rType(key))
+}
+
+func (p *Pipeline) Wait(numSlaves int, timeout int) *RespInt {
+	return p.enqueueInt(rWait(numSlaves, timeout))
+}
+
+//////////
+//STRINGS
+func (p *Pipeline) Append(key string, value string) *RespInt {
+	return p.enqueueInt(rAppend(key, value))
+}
+
+func (p *Pipeline) BitCount(key string) *RespInt {
+	return p.enqueueInt(rBitCount(key))
+}
+
+func (p *Pipeline) BitOp(bitOperation BitOperation, destKey string, keys ...string) *RespInt {
+
+	rs, err := rBitOp(bitOperation, destKey, keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+//TODO: agregar verificacion start end
+func (p *Pipeline) BitPos(key string, bit bool, startEnd ...int) *RespInt {
+	return p.enqueueInt(rBitPos(key, bit, startEnd...))
+}
+
+func (p *Pipeline) Get(key string) *RespString {
+	return p.enqueueStr(rGet(key))
+}
+
+func (p *Pipeline) GetBit(key string, offset int) *RespInt {
+	return p.enqueueInt(rGetBit(key, offset))
+}
+
+func (p *Pipeline) GetRange(key string, start int, end int) *RespString {
+	return p.enqueueStr(rGetRange(key, start, end))
+}
+
+func (p *Pipeline) GetSet(key string, value string) *RespString {
+	return p.enqueueStr(rGetSet(key, value))
+}
+
+func (p *Pipeline) Set(key string, value string) *RespString {
+	return p.enqueueStr(rSet(key, value))
+}
+
+//TODO agregar verificacion
+func (p *Pipeline) SetX(key string, value string, keyExpiration *KeyExpiration, keyExistance *KeyExistance) *RespString {
+
+	rs, err := rSetX(key, value, keyExpiration, keyExistance)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStr(rs)
+}
+
+func (p *Pipeline) Incr(key string) *RespInt {
+	return p.enqueueInt(rIncr(key))
+}
+
+func (p *Pipeline) IncrBy(key string, increment int) *RespInt {
+	return p.enqueueInt(rIncrBy(key, increment))
+}
+
+func (p *Pipeline) IncrByFloat(key string, increment float64) *RespFloat {
+	return p.enqueueFloat(rIncrByFloat(key, increment))
+}
+
+func (p *Pipeline) Decr(key string) *RespInt {
+	return p.enqueueInt(rDecr(key))
+}
+
+func (p *Pipeline) DecrBy(key string, decrement int) *RespInt {
+	return p.enqueueInt(rDecrBy(key, decrement))
+}
+
+func (p *Pipeline) MGet(keys ...string) *RespStringArray {
+
+	rs, err := rMGet(keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStrArray(rs)
+}
+
+func (p *Pipeline) MSet(keyValues ...string) *RespString {
+
+	rs, err := rMSet(keyValues...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStr(rs)
+}
+
+func (p *Pipeline) MSetNx(keyValues ...string) *RespBool {
+
+	rs, err := rMSetNx(keyValues...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueBool(rs)
+}
+
+func (p *Pipeline) PSetEx(key string, milliseconds int, value string) *RespString {
+	return p.enqueueStr(rPSetEx(key, milliseconds, value))
+}
+
+func (p *Pipeline) SetEx(key string, seconds int, value string) *RespString {
+	return p.enqueueStr(rSetEx(key, seconds, value))
+}
+
+func (p *Pipeline) SetBit(key string, offset int, value bool) *RespInt {
+	return p.enqueueInt(rSetBit(key, offset, value))
+}
+
+func (p *Pipeline) SetNx(key string, value string) *RespInt {
+	return p.enqueueInt(rSetNx(key, value))
+}
+
+func (p *Pipeline) SetRange(key string, offset int, value string) *RespInt {
+	return p.enqueueInt(rSetRange(key, offset, value))
+}
+
+func (p *Pipeline) StrLen(key string) *RespInt {
+	return p.enqueueInt(rStrLen(key))
+}
+
+////////
+//LISTS
+///////
+
+func (p *Pipeline) LLen(key string) *RespInt {
+	return p.enqueueInt(rLLen(key))
+}
+
+func (p *Pipeline) LIndex(key string, index int) *RespString {
+	return p.enqueueStr(rLIndex(key, index))
+}
+
+func (p *Pipeline) LPush(key string, values ...string) *RespInt {
+
+	rs, err := rLPush(key, values...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) LPushX(key string, value string) *RespInt {
+	return p.enqueueInt(rLPushX(key, value))
+}
+
+func (p *Pipeline) RPush(key string, values ...string) *RespInt {
+
+	rs, err := rRPush(key, values...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) RPushX(key string, value string) *RespInt {
+	return p.enqueueInt(rRPushX(key, value))
+}
+
+func (p *Pipeline) LPop(key string) *RespString {
+	return p.enqueueStr(rLPop(key))
+}
+
+func (p *Pipeline) RPop(key string) *RespString {
+	return p.enqueueStr(rRPop(key))
+}
+
+func (p *Pipeline) LSet(key string, index int, value string) *RespString {
+	return p.enqueueStr(rLSet(key, index, value))
+}
+
+func (p *Pipeline) LInsert(key string, location InsertLocation, pivot string, value string) *RespInt {
+
+	rs, err := rLInsert(key, location, pivot, value)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) LRange(key string, start int, stop int) *RespString {
+	return p.enqueueStr(rLRange(key, start, stop))
+}
+
+func (p *Pipeline) LRem(key string, count int, value string) *RespInt {
+	return p.enqueueInt(rLRem(key, count, value))
+}
+
+func (p *Pipeline) LTrim(key string, start int, stop int) *RespString {
+	return p.enqueueStr(rLTrim(key, start, stop))
+}
+
+func (p *Pipeline) RPopLPush(source string, destination string) *RespString {
+	return p.enqueueStr(rRPopLPush(source, destination))
+}
+
+func (p *Pipeline) BLPop(timeout int, keys ...string) *RespStringArray {
+
+	rs, err := rBLPop(timeout, keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStrArray(rs)
+}
+
+func (p *Pipeline) BRPop(timeout int, keys ...string) *RespStringArray {
+
+	rs, err := rBRPop(timeout, keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStrArray(rs)
+}
+
+func (p *Pipeline) BRPopLPush(source string, destination string, timeout int) *RespString {
+	return p.enqueueStr(rBRPopLPush(source, destination, timeout))
+}
+
+////////
+//HASHES
+///////
+
+func (p *Pipeline) HDel(key string, fields ...string) *RespInt {
+
+	rs, err := rHDel(key, fields...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) HExists(key string, field string) *RespInt {
+	return p.enqueueInt(rHExists(key, field))
+}
+
+func (p *Pipeline) HGet(key string, field string) *RespString {
+	return p.enqueueStr(rHGet(key, field))
+}
+
+func (p *Pipeline) HGetAll(key string) *RespStringArray {
+	return p.enqueueStrArray(rHGetAll(key))
+}
+
+func (p *Pipeline) HIncrBy(key string, field string, increment int) *RespInt {
+	return p.enqueueInt(rHIncrBy(key, field, increment))
+}
+
+func (p *Pipeline) HIncrByFloat(key string, field string, increment float64) *RespFloat {
+	return p.enqueueFloat(rHIncrByFloat(key, field, increment))
+}
+
+func (p *Pipeline) HKeys(key string) *RespStringArray {
+	return p.enqueueStrArray(rHKeys(key))
+}
+
+func (p *Pipeline) HLen(key string) *RespInt {
+	return p.enqueueInt(rHLen(key))
+}
+
+func (p *Pipeline) HMGet(key string, fields ...string) *RespStringArray {
+	rs, err := rHMGet(key, fields...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStrArray(rs)
+}
+
+func (p *Pipeline) HMSet(key string, fieldValues ...string) *RespString {
+	rs, err := rHMSet(key, fieldValues...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStr(rs)
+}
+
+func (p *Pipeline) HSet(key string, field string, value string) *RespInt {
+	return p.enqueueInt(rHSet(key, field, value))
+}
+
+func (p *Pipeline) HSetNx(key string, field string, value string) *RespInt {
+	return p.enqueueInt(rHSetNx(key, field, value))
+}
+
+/* Since 3.2.0
+func (p *Pipeline) HStrLen(key string, field string) *RespInt {
+	return p.enqueueInt(rHStrLen(key, field))
+}
+*/
+
+func (p *Pipeline) HVals(key string) *RespStringArray {
+	return p.enqueueStrArray(rHVals(key))
+}
+
+//HScan
+
+////////
+//CONNECTION
+///////
+
+func (p *Pipeline) Select(index uint) *RespString {
+	return p.enqueueStr(rSelect(index))
+}
+
+///////
+///////
+
+func (p *Pipeline) enqueueResp(cmds [][]byte, rs Response) {
+
+	p.cmdsQueue.enqueue(cmds)
+	p.respQueue.enqueue(rs)
+
+	for _, c := range cmds {
+		p.cmdsSize += len(c)
+	}
+
+}
+
+func (p *Pipeline) enqueueStr(cmds [][]byte) *RespString {
+	rs := new(RespString)
+	p.enqueueResp(cmds, rs)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueStrArray(cmds [][]byte) *RespStringArray {
+	rs := new(RespStringArray)
+	p.enqueueResp(cmds, rs)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueInt(cmds [][]byte) *RespInt {
+	rs := new(RespInt)
+	p.enqueueResp(cmds, rs)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueFloat(cmds [][]byte) *RespFloat {
+	rs := new(RespFloat)
+	p.enqueueResp(cmds, rs)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueBool(cmds [][]byte) *RespBool {
+	rs := new(RespBool)
+	p.enqueueResp(cmds, rs)
+
+	return rs
+}
+
+func (p *Pipeline) execute() (err error) {
+
+	conn := p.redis.pool.get()
+	defer p.cleanConn(conn)
+
+	////////////////
+	//WRITE COMMANDS
+	//////////////
+	cmdDeq := func() [][]byte {
+		if c, ok := p.cmdsQueue.dequeue().([][]byte); ok {
+			return c
+		}
+		return nil
+	}
+
+	writer := bufio.NewWriterSize(conn, p.cmdsSize)
+	for cmd := cmdDeq(); cmd != nil; cmd = cmdDeq() {
+		err = write(cmd, writer)
+		if err != nil {
+			return
+		}
+	}
+
+	err = writer.Flush()
+	if err != nil {
+		return
+	}
+
+	////////////////
+	//READ RESPONSE
+	//////////////
+	respDeq := func() Response {
+		if c, ok := p.respQueue.dequeue().(Response); ok {
+			return c
+		}
+		return nil
+	}
+
+	reader := bufio.NewReader(conn)
+	for resp := respDeq(); resp != nil; resp = respDeq() {
+
+		var rr *redisResponse
+		rr, err = read(reader)
+		if err == nil {
+			resp.set(rr)
+		}
+
+	}
+
+	return
+
+}
+
+func (p *Pipeline) cleanConn(conn *net.TCPConn) {
+
+	go func() {
+		m := multiCompile("SELECT", "0")
+		writeRead(m, conn)
+
+		m = multiCompile("DISCARD")
+		writeRead(m, conn)
+
+		p.redis.pool.put(conn)
+	}()
+
+}
