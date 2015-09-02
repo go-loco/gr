@@ -28,12 +28,10 @@ A Go (Golang) Redis 3.2 Client that aims to be EASY to use, and supports:
 
 
 #Testing
-Create 3 redis-server
+Create 3 redis servers
 
 redis-server
-
 redis-server --port 6780 --slaveof localhost 6379
-
 redis-server --port 7000
 
 
