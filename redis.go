@@ -460,6 +460,67 @@ func (r *Redis) BRPopLPush(source string, destination string, timeout int) (stri
 	return r.writeReadStr(rBRPopLPush(source, destination, timeout))
 }
 
+///////
+//SETS
+//////
+
+func (r *Redis) SAdd(key string, values ...string) (int64, error) {
+	rs, err := rSAdd(key, values...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) SCard(key string) (int64, error) {
+	return r.writeReadInt(rSCard(key))
+}
+
+func (r *Redis) SDiff(keys ...string) ([]string, error) {
+	rs, err := rSDiff(keys...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadStrArray(rs)
+}
+
+func (r *Redis) SDiffStore(key string, keys ...string) ([]string, error) {
+	rs, err := rSDiffStore(key, keys...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) SInter(keys ...string) ([]string, error) {
+	rs, err := rSInter(keys...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadStrArray(rs)
+}
+
+func (r *Redis) SInterStore(key string, keys ...string) ([]string, error) {
+	rs, err := rSInterStore(key, keys...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) SIsMember(key string) (int64, error) {
+	return r.writeReadBool(rSIsMember(key))
+}
+
+func (r *Redis) SMembers(key string) ([]string, error) {
+	return r.writeReadStrArray(rs)
+}
+
 ////////
 //HASHES
 ///////
