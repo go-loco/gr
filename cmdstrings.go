@@ -60,7 +60,7 @@ func rBitOp(bitOperation BitOperation, destKey string, keys ...string) ([][]byte
 		return nil, ParamErr
 	}
 
-	return multiCompile3("BITOP", bitOperationArray[bitOperation], destKey, keys...), nil
+	return multiCompile(append([]string{"BITOP", bitOperationArray[bitOperation], destKey}, keys...)...), nil
 }
 
 func rBitPos(key string, bit bool, startEnd ...int) [][]byte {
@@ -125,7 +125,7 @@ func rMGet(keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile1("MGET", keys...), nil
+	return multiCompile(append([]string{"MGET"}, keys...)...), nil
 }
 
 func rSet(key string, value string) [][]byte {
@@ -167,7 +167,7 @@ func rMSet(keyValues ...string) ([][]byte, error) {
 		return nil, ParamsNotTuplesErr
 	}
 
-	return multiCompile1("MSET", keyValues...), nil
+	return multiCompile(append([]string{"MSET"}, keyValues...)...), nil
 }
 
 func rMSetNx(keyValues ...string) ([][]byte, error) {
@@ -180,7 +180,7 @@ func rMSetNx(keyValues ...string) ([][]byte, error) {
 		return nil, ParamsNotTuplesErr
 	}
 
-	return multiCompile1("MSETNX", keyValues...), nil
+	return multiCompile(append([]string{"MSETNX"}, keyValues...)...), nil
 }
 
 func rPSetEx(key string, milliseconds int, value string) [][]byte {

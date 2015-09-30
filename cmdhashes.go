@@ -10,7 +10,7 @@ func rHDel(key string, fields ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile2("HDEL", key, fields...), nil
+	return multiCompile(append([]string{"HDEL", key}, fields...)...), nil
 }
 
 func rHExists(key string, field string) [][]byte {
@@ -46,7 +46,7 @@ func rHMGet(key string, fields ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile2("HMGET", key, fields...), nil
+	return multiCompile(append([]string{"HMGET", key}, fields...)...), nil
 }
 
 func rHMSet(key string, fieldValues ...string) ([][]byte, error) {
@@ -58,7 +58,7 @@ func rHMSet(key string, fieldValues ...string) ([][]byte, error) {
 		return nil, ParamsNotTuplesErr
 	}
 
-	return multiCompile2("HMSET", key, fieldValues...), nil
+	return multiCompile(append([]string{"HMSET", key}, fieldValues...)...), nil
 }
 
 func rHSet(key string, field string, value string) [][]byte {
@@ -85,5 +85,5 @@ func rHScan(key string, cursor int, scanParams *ScanParams) [][]byte {
 		return multiCompile("HSCAN", key, strconv.Itoa(cursor))
 	}
 
-	return multiCompile3("HSCAN", key, strconv.Itoa(cursor), scanParams.params...)
+	return multiCompile(append([]string{"HSCAN", key, strconv.Itoa(cursor)}, scanParams.params...)...)
 }

@@ -44,12 +44,12 @@ func newPubSub(redis *Redis) (*PubSub, error) {
 }
 
 func (p *PubSub) subscribe(redisChannels ...string) {
-	c := multiCompile1("SUBSCRIBE", redisChannels...)
+	c := multiCompile(append([]string{"SUBSCRIBE"}, redisChannels...)...)
 	p.channelListener(c)
 }
 
 func (p *PubSub) pSubscribe(redisChannels ...string) {
-	c := multiCompile1("PSUBSCRIBE", redisChannels...)
+	c := multiCompile(append([]string{"PSUBSCRIBE"}, redisChannels...)...)
 	p.channelListener(c)
 }
 
@@ -106,7 +106,7 @@ func (p *PubSub) unSubscribe() {
 
 	p.done <- true
 
-	c := multiCompile1("UNSUBSCRIBE")
+	c := multiCompile("UNSUBSCRIBE")
 	write(c, p.writer)
 	p.writer.Flush()
 
