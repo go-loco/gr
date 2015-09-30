@@ -513,8 +513,8 @@ func (r *Redis) SInterStore(key string, keys ...string) (int64, error) {
 	return r.writeReadInt(rs)
 }
 
-func (r *Redis) SIsMember(value string) (bool, error) {
-	return r.writeReadBool(rSIsMember(value))
+func (r *Redis) SIsMember(key string, value string) (bool, error) {
+	return r.writeReadBool(rSIsMember(key, value))
 }
 
 func (r *Redis) SMembers(key string) ([]string, error) {
@@ -525,12 +525,12 @@ func (r *Redis) SMove(sourceKey string, destinationKey string, value string) (bo
 	return r.writeReadBool(rSMove(sourceKey, destinationKey, value))
 }
 
-func (r *Redis) SPop(key string, count int) (string, error) {
-	return r.writeReadStr(rSPop(key, count))
+func (r *Redis) SPop(key string) (string, error) {
+	return r.writeReadStr(rSPop(key))
 }
 
-func (r *Redis) SRandMember(key string, count int) (string, error) {
-	return r.writeReadStr(rSRandMember(key, count))
+func (r *Redis) SRandMember(key string, count int) ([]string, error) {
+	return r.writeReadStrArray(rSRandMember(key, count))
 }
 
 func (r *Redis) SRem(key string, values ...string) (int64, error) {

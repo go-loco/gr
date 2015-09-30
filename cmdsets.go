@@ -15,7 +15,7 @@ func rSCard(key string) [][]byte {
 }
 
 func rSDiff(keys ...string) ([][]byte, error) {
-	if len(keys) < 1 {
+	if len(keys) < 2 {
 		return nil, NotEnoughParamsErr
 	}
 
@@ -23,7 +23,7 @@ func rSDiff(keys ...string) ([][]byte, error) {
 }
 
 func rSDiffStore(key string, keys ...string) ([][]byte, error) {
-	if len(keys) < 1 {
+	if len(keys) < 2 {
 		return nil, NotEnoughParamsErr
 	}
 
@@ -31,7 +31,7 @@ func rSDiffStore(key string, keys ...string) ([][]byte, error) {
 }
 
 func rSInter(keys ...string) ([][]byte, error) {
-	if len(keys) < 1 {
+	if len(keys) < 2 {
 		return nil, NotEnoughParamsErr
 	}
 
@@ -39,15 +39,15 @@ func rSInter(keys ...string) ([][]byte, error) {
 }
 
 func rSInterStore(key string, keys ...string) ([][]byte, error) {
-	if len(keys) < 1 {
+	if len(keys) < 2 {
 		return nil, NotEnoughParamsErr
 	}
 
 	return multiCompile2("SINTERSTORE", key, keys...), nil
 }
 
-func rSIsMember(value string) ([][]byte) {
-	return multiCompile("SISMEMBER", value)
+func rSIsMember(key string, value string) ([][]byte) {
+	return multiCompile("SISMEMBER", key, value)
 }
 
 func rSMembers(key string) ([][]byte) {
@@ -58,8 +58,8 @@ func rSMove(sourceKey, destinationKey, value string) ([][]byte) {
 	return multiCompile3("SMOVE", sourceKey, destinationKey, value)
 }
 
-func rSPop(key string, count int) ([][]byte) {
-	return multiCompile2("SPOP", key, strconv.Itoa(count))
+func rSPop(key string) ([][]byte) {
+	return multiCompile("SPOP", key)
 }
 
 func rSRandMember(key string, count int) ([][]byte) {
@@ -75,7 +75,6 @@ func rSRem(key string, values ...string) ([][]byte, error) {
 }
 
 func rSScan(key string, cursor int, scanParams *ScanParams) [][]byte {
-
 	if scanParams == nil {
 		return multiCompile("SSCAN", key, strconv.Itoa(cursor))
 	}
@@ -84,7 +83,7 @@ func rSScan(key string, cursor int, scanParams *ScanParams) [][]byte {
 }
 
 func rSUnion(keys ...string) ([][]byte, error) {
-	if len(keys) < 1 {
+	if len(keys) < 2 {
 		return nil, NotEnoughParamsErr
 	}
 
@@ -92,7 +91,7 @@ func rSUnion(keys ...string) ([][]byte, error) {
 }
 
 func rSUnionStore(key string, keys ...string) ([][]byte, error) {
-	if len(keys) < 1 {
+	if len(keys) < 2 {
 		return nil, NotEnoughParamsErr
 	}
 
