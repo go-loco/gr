@@ -46,16 +46,16 @@ func rSInterStore(key string, keys ...string) ([][]byte, error) {
 	return multiCompile2("SINTERSTORE", key, keys...), nil
 }
 
-func rSIsMember(key string) ([][]byte) {
-	return multiCompile("SISMEMBER", key)
+func rSIsMember(value string) ([][]byte) {
+	return multiCompile("SISMEMBER", value)
 }
 
 func rSMembers(key string) ([][]byte) {
 	return multiCompile("SMEMBERS", key)
 }
 
-func rSMove(key string, sourceSet string, destinationSet string, value string) ([][]byte) {
-	return multiCompile4("SMOVE", key, sourceSet, destinationSet, value)
+func rSMove(sourceKey, destinationKey, value string) ([][]byte) {
+	return multiCompile3("SMOVE", sourceKey, destinationKey, value)
 }
 
 func rSPop(key string, count int) ([][]byte) {
