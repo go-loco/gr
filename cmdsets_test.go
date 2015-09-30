@@ -46,13 +46,13 @@ func TestSDiffWrongParams(t *testing.T) {
 
 func TestSDiff(t *testing.T) {
 	redis.SAdd("gr::myset::sdiff", "a", "b", "c", "d")
-	redis.SAdd("gr::myotherset::sdiff", "a", "c")
+	redis.SAdd("gr::myotherset::sdiff", "a", "c", "d")
 
 	if r, err := redis.SDiff("gr::myset::sdiff", "gr::myotherset::sdiff"); err != nil {
 		t.Fail()
 	
 	} else {
-		if !reflect.DeepEqual(r, []string{"b", "d"}) {
+		if !reflect.DeepEqual(r, []string{"b"}) {
 			t.Fail()
 		}
 	}
@@ -138,13 +138,9 @@ func TestSIsMember(t *testing.T) {
 func TestSMembers(t *testing.T) {
 	redis.SAdd("gr::myset::smembers", "a", "b", "c", "d")
 	
-	if r, err := redis.SMembers("gr::myset::smembers"); err != nil {
+	r, err := redis.SMembers("gr::myset::smembers")
+	if err != nil || len(r) != 4 {
 		t.Fail()
-	
-	} else {
-		if !reflect.DeepEqual(r, []string{"a", "b", "d", "c"}) {
-			t.Fail()
-		}
 	}
 
 	print(".")
@@ -226,13 +222,9 @@ func TestSUnion(t *testing.T) {
 	redis.SAdd("gr::myset::sunion", "a", "b", "c")
 	redis.SAdd("gr::myotherset::sunion", "c", "d")
 
-	if r, err := redis.SUnion("gr::myset::sunion", "gr::myotherset::sunion"); err != nil {
+	r, err := redis.SUnion("gr::myset::sunion", "gr::myotherset::sunion");
+	if err != nil || len(r) != 4 {
 		t.Fail()
-	
-	} else {
-		if !reflect.DeepEqual(r, []string{"a", "b", "d", "c"}) {
-			t.Fail()
-		}
 	}
 
 	print(".")
