@@ -3,12 +3,26 @@ package gr
 import (
 	"log"
 	"testing"
+	"errors"
 )
+
+type testCase func()
 
 var redis *Redis
 
-func init() {
+func TestMain(m *testing.M) {
+    log.Println("Init test")
 
+    setup()
+
+    code := m.Run()
+
+    teardown()
+
+    os.Exit(code)
+}
+
+func setup() {
 	log.Println("[Testing Connect]")
 
 	var err error
@@ -21,14 +35,28 @@ func init() {
 	println(".[OK]")
 }
 
-func removeKeys(t *testing.T) {
-	r1, err := redis.Keys("gr::*")
+func teardown() {
+	if err := removeKeys(); err != nil {
+		panic(err)
+	}
+}
+
+func removeKeys() err {
+	r1, err := redis.Keys("*")
 	if err != nil {
-		t.Fail()
+		return err
 	}
 
 	r2, err := redis.Del(r1...)
 	if err != nil || int(r2) != len(r1) {
-		t.Fail()
+		return errors.New("Unexpected fail in removeKeys method")
+	}
+}
+
+func safeTestContext(fn testCase) {
+	fn()
+
+	if err := removeKeys(); err != nil {
+		panic(err)
 	}
 }
