@@ -460,6 +460,111 @@ func (r *Redis) BRPopLPush(source string, destination string, timeout int) (stri
 	return r.writeReadStr(rBRPopLPush(source, destination, timeout))
 }
 
+///////
+//SETS
+//////
+
+func (r *Redis) SAdd(key string, values ...string) (int64, error) {
+	rs, err := rSAdd(key, values...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) SCard(key string) (int64, error) {
+	return r.writeReadInt(rSCard(key))
+}
+
+func (r *Redis) SDiff(keys ...string) ([]string, error) {
+	rs, err := rSDiff(keys...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadStrArray(rs)
+}
+
+func (r *Redis) SDiffStore(key string, keys ...string) (int64, error) {
+	rs, err := rSDiffStore(key, keys...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) SInter(keys ...string) ([]string, error) {
+	rs, err := rSInter(keys...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadStrArray(rs)
+}
+
+func (r *Redis) SInterStore(key string, keys ...string) (int64, error) {
+	rs, err := rSInterStore(key, keys...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) SIsMember(key string, value string) (bool, error) {
+	return r.writeReadBool(rSIsMember(key, value))
+}
+
+func (r *Redis) SMembers(key string) ([]string, error) {
+	return r.writeReadStrArray(rSMembers(key))
+}
+
+func (r *Redis) SMove(sourceKey string, destinationKey string, value string) (bool, error) {
+	return r.writeReadBool(rSMove(sourceKey, destinationKey, value))
+}
+
+func (r *Redis) SPop(key string) (string, error) {
+	return r.writeReadStr(rSPop(key))
+}
+
+func (r *Redis) SRandMember(key string, count int) ([]string, error) {
+	return r.writeReadStrArray(rSRandMember(key, count))
+}
+
+func (r *Redis) SRem(key string, values ...string) (int64, error) {
+	rs, err := rSRem(key, values...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) SScan(key string, cursor int, scanParams *ScanParams) (int64, []string, error) {
+	s, err := r.writeReadStrArray(rSScan(key, cursor, scanParams))
+	return scanGeneric(s, err)
+}
+
+func (r *Redis) SUnion(keys ...string) ([]string, error) {
+	rs, err := rSUnion(keys...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadStrArray(rs)
+}
+
+func (r *Redis) SUnionStore(key string, keys ...string) (int64, error) {
+	rs, err := rSUnionStore(key, keys...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
 ////////
 //HASHES
 ///////
