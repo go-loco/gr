@@ -146,6 +146,18 @@ func TestSMembers(t *testing.T) {
 	print(".")
 }
 
+func TestSMove(t *testing.T) {
+	redis.SAdd("gr::myset::smove", "a", "b")
+	redis.SAdd("gr::myotherset::smove", "c", "d")
+	
+	r, err := redis.SMove("gr::myset::smove", "gr::myotherset::smove", "a")
+	if err != nil || !r {
+		t.Fail()
+	}
+
+	print(".")
+}
+
 func TestSPop(t *testing.T) {
 	redis.SAdd("gr::myset::spop", "a", "b", "c", "d")
 	
@@ -222,7 +234,7 @@ func TestSUnion(t *testing.T) {
 	redis.SAdd("gr::myset::sunion", "a", "b", "c")
 	redis.SAdd("gr::myotherset::sunion", "c", "d")
 
-	r, err := redis.SUnion("gr::myset::sunion", "gr::myotherset::sunion");
+	r, err := redis.SUnion("gr::myset::sunion", "gr::myotherset::sunion")
 	if err != nil || len(r) != 4 {
 		t.Fail()
 	}
@@ -244,6 +256,135 @@ func TestSUnionStore(t *testing.T) {
 
 	r, err := redis.SUnionStore("gr::myresultset::sunion", "gr::myset::sunion", "gr::myotherset::sunion")
 	if err != nil || r != 4 {
+		t.Fail()
+	}
+
+	print(".")
+}
+
+func TestSetsPipelined(t *testing.T) {
+	var sAdd, sCard, sDiffStore, sInterStore, sRem, sUnionStore *RespInt
+	var sDiff, sInter, sMembers, sRandMember, sUnion *RespStringArray
+	var sIsMember, sMove *RespBool
+	var sPop *RespString
+
+	err := redis.Pipelined(func(p *Pipeline) {
+		sAdd = p.SAdd("gr::pipeline::myset::sadd", "1", "2")
+		
+		p.SAdd("gr::pipeline::myset::scard", "1", "2", "3")
+		sCard = p.SCard("gr::pipeline::myset::scard")
+
+		p.SAdd("gr::pipeline::myset::sdiff", "a", "b", "c", "d")
+		p.SAdd("gr::pipeline::myotherset::sdiff", "a", "c", "d")
+		sDiff = p.SDiff("gr::pipeline::myset::sdiff", "gr::pipeline::myotherset::sdiff")
+	
+		p.SAdd("gr::pipeline::myset::sdiffstore", "a", "b", "c", "d")
+		p.SAdd("gr::pipeline::myotherset::sdiffstore", "a", "c")
+		sDiffStore = p.SDiffStore("gr::pipeline::myresultset::sdiffstore", "gr::pipeline::myset::sdiffstore", "gr::pipeline::myotherset::sdiffstore")
+	
+		p.SAdd("gr::pipeline::myset::sinter", "a", "b", "c", "d")
+		p.SAdd("gr::pipeline::myotherset::sinter", "c")
+		sInter = p.SInter("gr::pipeline::myset::sinter", "gr::pipeline::myotherset::sinter")
+
+		p.SAdd("gr::pipeline::myset::sinterstore", "a", "b", "c", "d")
+		p.SAdd("gr::pipeline::myotherset::sinterstore", "c")
+		sInterStore = p.SInterStore("gr::pipeline::myresultset::sinterstore", "gr::pipeline::myset::sinterstore", "gr::pipeline::myotherset::sinterstore")
+
+		p.SAdd("gr::pipeline::myset::sismember", "a", "b", "c", "d")
+		sIsMember = p.SIsMember("gr::pipeline::myset::sismember", "a")
+
+		p.SAdd("gr::pipeline::myset::smembers", "a", "b", "c", "d")
+		sMembers = p.SMembers("gr::pipeline::myset::smembers")
+	
+		p.SAdd("gr::pipeline::myset::smove", "a", "b")
+		p.SAdd("gr::pipeline::myotherset::smove", "c", "d")
+	    sMove = p.SMove("gr::pipeline::myset::smove", "gr::pipeline::myotherset::smove", "a")
+
+		p.SAdd("gr::pipeline::myset::spop", "a", "b", "c", "d")
+		sPop = p.SPop("gr::pipeline::myset::spop")
+
+		p.SAdd("gr::pipeline::myset::srandmember", "a", "b", "c", "d")
+		sRandMember = p.SRandMember("gr::pipeline::myset::srandmember", 4)
+
+		p.SAdd("gr::pipeline::myset::srem", "a", "b", "c", "d")
+		sRem = p.SRem("gr::pipeline::myset::srem", "c", "d")
+
+		p.SAdd("gr::pipeline::myset::sunion", "a", "b", "c")
+		p.SAdd("gr::pipeline::myotherset::sunion", "c", "d")
+		sUnion = p.SUnion("gr::pipeline::myset::sunion", "gr::pipeline::myotherset::sunion")
+
+		p.SAdd("gr::pipeline::myset::sunion", "a", "b", "c")
+		p.SAdd("gr::pipeline::myotherset::sunion", "c", "d")
+		sUnionStore = p.SUnionStore("gr::pipeline::myresultset::sunion", "gr::pipeline::myset::sunion", "gr::pipeline::myotherset::sunion")
+	})
+
+	if err != nil {
+		t.Fail()
+	}
+
+	if sAdd.Error != nil || sAdd.Value != 2 {
+		t.Fail()
+	}
+
+	if sCard.Error != nil || sCard.Value != 3 {
+		t.Fail()
+	}
+
+	if sDiff.Error != nil {
+		t.Fail()
+	
+	} else {
+		if !reflect.DeepEqual(sDiff.Value, []string{"b"}) {
+			t.Fail()
+		}
+	}
+
+	if sDiffStore.Error != nil || sDiffStore.Value != 2 {
+		t.Fail()
+	}
+
+	if sInter.Error != nil {
+		t.Fail()
+	
+	} else {
+		if !reflect.DeepEqual(sInter.Value, []string{"c"}) {
+			t.Fail()
+		}
+	}
+
+	if sInterStore.Error != nil || sInterStore.Value != 1 {
+		t.Fail()
+	}
+
+	if sIsMember.Error != nil || !sIsMember.Value {
+		t.Fail()
+	}
+
+	if sMembers.Error != nil || len(sMembers.Value) != 4 {
+		t.Fail()
+	}
+
+	if sMove.Error != nil || !sMove.Value {
+		t.Fail()
+	}
+
+	if sPop.Error != nil || sPop.Value == "" {
+		t.Fail()
+	}
+
+	if sRandMember.Error != nil || len(sRandMember.Value) != 4 {
+		t.Fail()
+	}
+
+	if sRem.Error != nil || sRem.Value != 2 {
+		t.Fail()
+	}
+
+	if sUnion.Error != nil || len(sUnion.Value) != 4 {
+		t.Fail()
+	}
+
+	if sUnionStore.Error != nil || sUnionStore.Value != 4 {
 		t.Fail()
 	}
 

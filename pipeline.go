@@ -394,6 +394,114 @@ func (p *Pipeline) BRPopLPush(source string, destination string, timeout int) *R
 	return p.enqueueStr(rBRPopLPush(source, destination, timeout))
 }
 
+///////
+//SETS
+//////
+
+func (p *Pipeline) SAdd(key string, values ...string) *RespInt {
+	rs, err := rSAdd(key, values...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) SCard(key string) *RespInt {
+	return p.enqueueInt(rSCard(key))
+}
+
+func (p *Pipeline) SDiff(keys ...string) *RespStringArray {
+	rs, err := rSDiff(keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStrArray(rs)
+}
+
+func (p *Pipeline) SDiffStore(key string, keys ...string) *RespInt {
+	rs, err := rSDiffStore(key, keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) SInter(keys ...string) *RespStringArray {
+	rs, err := rSInter(keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStrArray(rs)
+}
+
+func (p *Pipeline) SInterStore(key string, keys ...string) *RespInt {
+	rs, err := rSInterStore(key, keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) SIsMember(key string, value string) *RespBool {
+	return p.enqueueBool(rSIsMember(key, value))
+}
+
+func (p *Pipeline) SMembers(key string) *RespStringArray {
+	return p.enqueueStrArray(rSMembers(key))
+}
+
+func (p *Pipeline) SMove(sourceKey string, destinationKey string, value string) *RespBool {
+	return p.enqueueBool(rSMove(sourceKey, destinationKey, value))
+}
+
+func (p *Pipeline) SPop(key string) *RespString {
+	return p.enqueueStr(rSPop(key))
+}
+
+func (p *Pipeline) SRandMember(key string, count int) *RespStringArray {
+	return p.enqueueStrArray(rSRandMember(key, count))
+}
+
+func (p *Pipeline) SRem(key string, values ...string) *RespInt {
+	rs, err := rSRem(key, values...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) SUnion(keys ...string) *RespStringArray {
+	rs, err := rSUnion(keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStrArray(rs)
+}
+
+func (p *Pipeline) SUnionStore(key string, keys ...string) *RespInt {
+	rs, err := rSUnionStore(key, keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
 ////////
 //HASHES
 ///////
