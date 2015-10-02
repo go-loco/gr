@@ -18,7 +18,7 @@ func BenchmarkGosexyRedisPing(b *testing.B) {
 	var err error
 	gosexyRedisClient.Del("hello")
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.Ping()
+		_, err := gosexyRedisClient.Ping()
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -33,7 +33,7 @@ func BenchmarkGosexyRedisSet(b *testing.B) {
 	gosexyRedisClient.Del("hello")
 
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.Set("hello", 1)
+		_, err := gosexyRedisClient.Set("hello", 1)
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -44,7 +44,7 @@ func BenchmarkGosexyRedisSet(b *testing.B) {
 func BenchmarkGosexyRedisGet(b *testing.B) {
 	var err error
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.Get("hello")
+		_, err := gosexyRedisClient.Get("hello")
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -56,7 +56,7 @@ func BenchmarkGosexyRedisGet(b *testing.B) {
 func BenchmarkGosexyRedisIncr(b *testing.B) {
 	var err error
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.Incr("hello")
+		_, err := gosexyRedisClient.Incr("hello")
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -69,7 +69,7 @@ func BenchmarkGosexyRedisLPush(b *testing.B) {
 	gosexyRedisClient.Del("hello")
 
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.LPush("hello", i)
+		_, err := gosexyRedisClient.LPush("hello", i)
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -80,7 +80,7 @@ func BenchmarkGosexyRedisLPush(b *testing.B) {
 func BenchmarkGosexyRedisLRange10(b *testing.B) {
 	var err error
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.LRange("hello", 0, 10)
+		_, err := gosexyRedisClient.LRange("hello", 0, 10)
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -94,7 +94,7 @@ func BenchmarkGosexyRedisLRange10(b *testing.B) {
 func BenchmarkGosexyRedisLRange100(b *testing.B) {
 	var err error
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.LRange("hello", 0, 100)
+		_, err := gosexyRedisClient.LRange("hello", 0, 100)
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -106,7 +106,7 @@ func BenchmarkGosexyRedisPing(b *testing.B) {
 	var err error
 	redis.Del("hello")
 	for i := 0; i < b.N; i++ {
-		_, err = gosexyRedisClient.Ping()
+		_, err := gosexyRedisClient.Ping()
 		if err != nil {
 			b.Fatalf(err.Error())
 			break
@@ -117,11 +117,8 @@ func BenchmarkGosexyRedisPing(b *testing.B) {
 
 func BenchmarkGrRedisSet(b *testing.B) {
 	test := func() {
-		var err error
-		redis.Del("hello")
-
 		for i := 0; i < b.N; i++ {
-			_, err = redis.Set("hello", "1")
+			_, err := redis.Set("hello", "1")
 			if err != nil {
 				b.Fatalf(err.Error())
 				break
@@ -134,10 +131,10 @@ func BenchmarkGrRedisSet(b *testing.B) {
 
 func BenchmarkGrRedisGet(b *testing.B) {
 	test := func() {
-		var err error
+		redis.Set("hello", "1")
 
 		for i := 0; i < b.N; i++ {
-			_, err = redis.Get("hello")
+			_, err := redis.Get("hello")
 			if err != nil {
 				b.Fatalf(err.Error())
 				break
@@ -150,9 +147,8 @@ func BenchmarkGrRedisGet(b *testing.B) {
 
 func BenchmarkGrRedisIncr(b *testing.B) {
 	test := func() {
-		var err error
 		for i := 0; i < b.N; i++ {
-			_, err = redis.Incr("hello")
+			_, err := redis.Incr("hello")
 			if err != nil {
 				b.Fatalf(err.Error())
 				break
@@ -165,11 +161,8 @@ func BenchmarkGrRedisIncr(b *testing.B) {
 
 func BenchmarkGrRedisLPush(b *testing.B) {
 	test := func() {
-		var err error
-		redis.Del("hello")
-
 		for i := 0; i < b.N; i++ {
-			_, err = redis.LPush("hello", strconv.Itoa(i))
+			_, err := redis.LPush("hello", strconv.Itoa(i))
 			if err != nil {
 				b.Fatalf(err.Error())
 				break
@@ -182,9 +175,12 @@ func BenchmarkGrRedisLPush(b *testing.B) {
 
 func BenchmarkGrRedisLRange10(b *testing.B) {
 	test := func() {
-		var err error
 		for i := 0; i < b.N; i++ {
-			_, err = redis.LRange("hello", 0, 10)
+			redis.LPush("hello", strconv.Itoa(i))
+		}
+
+		for i := 0; i < b.N; i++ {
+			_, err := redis.LRange("hello", 0, 10)
 			if err != nil {
 				b.Fatalf(err.Error())
 				break
@@ -197,9 +193,12 @@ func BenchmarkGrRedisLRange10(b *testing.B) {
 
 func BenchmarkGrRedisLRange100(b *testing.B) {
 	test := func() {
-		var err error
 		for i := 0; i < b.N; i++ {
-			_, err = redis.LRange("hello", 0, 100)
+			redis.LPush("hello", strconv.Itoa(i))
+		}
+
+		for i := 0; i < b.N; i++ {
+			_, err := redis.LRange("hello", 0, 100)
 			if err != nil {
 				b.Fatalf(err.Error())
 				break
@@ -213,11 +212,9 @@ func BenchmarkGrRedisLRange100(b *testing.B) {
 func BenchmarkPipelineGet(b *testing.B) {
 	test := func() {
 		redis.Pipelined(func(p *Pipeline) {
-
 			for i := 0; i < b.N; i++ {
 				p.Get("family:father")
 			}
-
 		})
 	}
 

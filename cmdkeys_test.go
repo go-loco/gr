@@ -28,6 +28,8 @@ func TestDump(t *testing.T) {
 
 func TestExists(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Hernan")
+
 		if r, err := redis.Exists("gr::father"); err != nil || !r {
 			t.Fail()
 		}
@@ -151,6 +153,9 @@ func TestPersist(t *testing.T) {
 
 func TestKeys(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+		redis.Set("gr::son", "Luke")
+
 		r, err := redis.Keys("gr::*")
 		if err != nil || len(r) != 2 {
 			t.Fail()
@@ -164,6 +169,9 @@ func TestKeys(t *testing.T) {
 
 func TestRandomKey(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+		redis.Set("gr::son", "Luke")
+
 		r, err := redis.RandomKey()
 		if err != nil || r == "" {
 			t.Fail()
@@ -177,6 +185,8 @@ func TestRandomKey(t *testing.T) {
 
 func TestTTL(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+
 		r, err := redis.TTL("gr::father")
 		if err != nil || r != -1 {
 			t.Fail()
@@ -190,6 +200,8 @@ func TestTTL(t *testing.T) {
 
 func TestPTTL(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+
 		r, err := redis.PTTL("gr::father")
 		if err != nil || r != -1 {
 			t.Fail()
@@ -218,6 +230,8 @@ func TestRenameNx(t *testing.T) {
 
 func TestRename(t *testing.T) {
 	test := func() {
+		redis.Set("gr::changed", "foo")
+
 		r, err := redis.Rename("gr::changed", "gr::changed_2")
 		if err != nil || r != "OK" {
 			t.Fail()
@@ -231,6 +245,8 @@ func TestRename(t *testing.T) {
 
 func TestType(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+
 		r, err := redis.Type("gr::father")
 		if err != nil || r != "string" {
 			t.Fail()
@@ -254,6 +270,10 @@ func TestDelWrongParams(t *testing.T) {
 
 func TestScan(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+		redis.Set("gr::son", "Luke")
+		redis.Set("gr::otherson", "unknown")
+
 		_, r, err := redis.Scan(0, nil)
 
 		if len(r) == 0 || err != nil {
@@ -314,6 +334,8 @@ func TestSort(t *testing.T) {
 
 func TestSortStore(t *testing.T) {
 	test := func() {
+		redis.RPush("gr::mylist", "3", "2", "1")
+
 		sortParams := new(SortParams).By("gr::mylist").Alpha().Asc()
 		r, err := redis.SortStore("gr::mylist", "gr::resultkey", sortParams)
 		if err != nil || r != 3 {
@@ -346,6 +368,8 @@ func TestObjectEncoding(t *testing.T) {
 
 func TestObjectRefCount(t *testing.T) {
 	test := func() {
+		redis.Set("gr::object", "object")
+
 		r, err := redis.ObjectRefCount("gr::object")
 		if err != nil || r != 1 {
 			t.Fail()
@@ -359,9 +383,11 @@ func TestObjectRefCount(t *testing.T) {
 
 func TestObjectIdleTime(t *testing.T) {
 	test := func() {
-		time.Sleep(1200 * time.Millisecond)
-		r, err := redis.ObjectIdleTime("gr::object")
+		redis.Set("gr::object", "object")
 
+		time.Sleep(1200 * time.Millisecond)
+		
+		r, err := redis.ObjectIdleTime("gr::object")
 		if err != nil || r != 1 {
 			t.Fail()
 		}
@@ -372,6 +398,8 @@ func TestObjectIdleTime(t *testing.T) {
 
 func TestRestore(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+
 		dump, err := redis.Dump("gr::father")
 		if err != nil {
 			t.Fail()
@@ -427,6 +455,8 @@ func TestWait(t *testing.T) {
 
 func TestMigrate(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Darth")
+		
 		r, err := redis.Migrate("localhost", 7000, "gr::father", "0", 500, true, true)
 		if err != nil || r != "OK" {
 			t.Fail()

@@ -31,8 +31,9 @@ func TestHSet(t *testing.T) {
 
 func TestHGet(t *testing.T) {
 	test := func() {
-		r, err := redis.HGet("gr::myhash", "father")
+		redis.HSet("gr::myhash", "father", "Darth Vader")
 
+		r, err := redis.HGet("gr::myhash", "father")
 		if err != nil || r != "Darth Vader" {
 			t.Fail()
 		}
@@ -45,8 +46,12 @@ func TestHGet(t *testing.T) {
 
 func TestHGetAll(t *testing.T) {
 	test := func() {
-		r, err := redis.HGetAll("gr::myhash")
+		redis.HSet("gr::myhash", "father", "Darth")
+		redis.HSet("gr::myhash", "father", "Darth Vader")
+		redis.HSet("gr::myhash", "son", "Luke")
+		redis.HSet("gr::myhash", "son", "Luke Skywalker")
 
+		r, err := redis.HGetAll("gr::myhash")
 		if err != nil || len(r) != 4 {
 			t.Fail()
 		}
@@ -60,8 +65,8 @@ func TestHGetAll(t *testing.T) {
 func TestHIncrBy(t *testing.T) {
 	test := func() {
 		redis.HSet("gr::myhash", "number", "2")
+		
 		r, err := redis.HIncrBy("gr::myhash", "number", 2)
-
 		if err != nil || r != 4 {
 			t.Fail()
 		}
@@ -74,8 +79,9 @@ func TestHIncrBy(t *testing.T) {
 
 func TestHIncrByFloat(t *testing.T) {
 	test := func() {
-		r, err := redis.HIncrByFloat("gr::myhash", "number", 2.2)
+		redis.HSet("gr::myhash", "number", "4")
 
+		r, err := redis.HIncrByFloat("gr::myhash", "number", 2.2)
 		if err != nil || r != 6.2 {
 			t.Fail()
 		}
@@ -88,6 +94,8 @@ func TestHIncrByFloat(t *testing.T) {
 
 func TestHExists(t *testing.T) {
 	test := func() {
+		redis.HSet("gr::myhash", "father", "Darth")
+
 		if r, err := redis.HExists("gr::myhash", "father"); err != nil || !r {
 			t.Fail()
 		}
@@ -100,6 +108,10 @@ func TestHExists(t *testing.T) {
 
 func TestHKeys(t *testing.T) {
 	test := func() {
+		redis.HSet("gr::myhash", "father", "Darth")
+		redis.HSet("gr::myhash", "son", "Luke")
+		redis.HSet("gr::myhash", "number", "4")
+
 		r, err := redis.HKeys("gr::myhash")
 		if err != nil {
 			t.Fail()
@@ -129,6 +141,10 @@ func TestHKeys(t *testing.T) {
 
 func TestHLen(t *testing.T) {
 	test := func() {
+		redis.HSet("gr::myhash", "father", "Darth")
+		redis.HSet("gr::myhash", "son", "Luke")
+		redis.HSet("gr::myhash", "number", "4")
+
 		if r, err := redis.HLen("gr::myhash"); err != nil || r != 3 {
 			t.Fail()
 		}
@@ -151,12 +167,15 @@ func TestHMGetWrongParams(t *testing.T) {
 
 func TestHMGet(t *testing.T) {
 	test := func() {
+		redis.HSet("gr::myhash", "father", "Darth")
+		redis.HSet("gr::myhash", "son", "Luke")
+
 		r, err := redis.HMGet("gr::myhash", "father", "son")
 		if err != nil || len(r) != 2 {
 			t.Fail()
 		}
 
-		if r[0] != "Darth Vader" || r[1] != "Luke Skywalker" {
+		if r[0] != "Darth" || r[1] != "Luke" {
 			t.Fail()
 		}
 	}
@@ -217,6 +236,10 @@ func TestHSetNx(t *testing.T) {
 
 func TestHVals(t *testing.T) {
 	test := func() {
+		redis.HSet("gr::myhash", "father", "Darth")
+		redis.HSet("gr::myhash", "son", "Luke")
+		redis.HSet("gr::myhash", "number", "4")
+
 		r, err := redis.HVals("gr::myhash")
 		if err != nil || len(r) != 3 {
 			t.Fail()
@@ -230,6 +253,10 @@ func TestHVals(t *testing.T) {
 
 func TestHScan(t *testing.T) {
 	test := func() {
+		redis.HSet("gr::myhash", "father", "Darth")
+		redis.HSet("gr::myhash", "son", "Luke")
+		redis.HSet("gr::myhash", "number", "4")
+
 		_, r, err := redis.HScan("gr::myhash", 0, nil)
 
 		if len(r) == 0 || err != nil {
@@ -262,6 +289,10 @@ func TestHDelWrongParams(t *testing.T) {
 
 func TestHDel(t *testing.T) {
 	test := func() {
+		redis.HSet("gr::myhash", "father", "Darth")
+		redis.HSet("gr::myhash", "son", "Luke")
+		redis.HSet("gr::myhash", "number", "4")
+		
 		if _, err := redis.HDel("gr::myhash", "father"); err != nil {
 			t.Fail()
 		}

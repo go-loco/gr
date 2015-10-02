@@ -12,18 +12,28 @@ func TestPubSubBegin(t *testing.T) {
 }
 
 func TestPubSub(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go pub(strconv.Itoa(i))
+	test := func() {
+		for i := 0; i < 10; i++ {
+			go pub(strconv.Itoa(i))
+		}
+		sub(false)
 	}
-	sub(false)
+
+	safeTestContext(test)
+
 	print(".")
 }
 
 func TestPubSubPattern(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go pub(strconv.Itoa(i))
+	test := func() {
+		for i := 0; i < 10; i++ {
+			go pub(strconv.Itoa(i))
+		}
+		sub(true)
 	}
-	sub(true)
+
+	safeTestContext(test)
+
 	print(".")
 }
 

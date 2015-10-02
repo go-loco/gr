@@ -4,6 +4,7 @@ import (
 	"log"
 	"testing"
 	"errors"
+	"os"
 )
 
 type testCase func()
@@ -41,16 +42,20 @@ func teardown() {
 	}
 }
 
-func removeKeys() err {
+func removeKeys() error {
 	r1, err := redis.Keys("*")
 	if err != nil {
 		return err
 	}
 
-	r2, err := redis.Del(r1...)
-	if err != nil || int(r2) != len(r1) {
-		return errors.New("Unexpected fail in removeKeys method")
+	if len(r1) > 0 {
+		r2, err := redis.Del(r1...)
+		if err != nil || int(r2) != len(r1) {
+			return errors.New("Unexpected fail in removeKeys method")
+		}
 	}
+
+	return nil
 }
 
 func safeTestContext(fn testCase) {

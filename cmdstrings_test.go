@@ -43,8 +43,9 @@ func TestSetNx(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	test := func() {
-		r, err := redis.Get("gr::father")
+		redis.Set("gr::father", "Hernan")
 
+		r, err := redis.Get("gr::father")
 		if err != nil || r != "Hernan" {
 			t.Fail()
 		}
@@ -57,8 +58,9 @@ func TestGet(t *testing.T) {
 
 func TestSetGet(t *testing.T) {
 	test := func() {
-		r, err := redis.GetSet("gr::father", "Hernán Di Chello")
+		redis.Set("gr::father", "Hernan")
 
+		r, err := redis.GetSet("gr::father", "Hernán Di Chello")
 		if err != nil || r != "Hernan" {
 			t.Fail()
 		}
@@ -134,6 +136,8 @@ func TestIncr(t *testing.T) {
 
 func TestIncrBy(t *testing.T) {
 	test := func() {
+		_, err := redis.Set("gr::number", "2")
+
 		r, err := redis.IncrBy("gr::number", 2)
 		if err != nil || r != 4 {
 			t.Fail()
@@ -160,6 +164,8 @@ func TestIncrByfloat(t *testing.T) {
 
 func TestDecr(t *testing.T) {
 	test := func() {
+		_, err := redis.Set("gr::number", "4")
+
 		r, err := redis.Decr("gr::number")
 		if err != nil || r != 3 {
 			t.Fail()
@@ -173,6 +179,8 @@ func TestDecr(t *testing.T) {
 
 func TestDecrBy(t *testing.T) {
 	test := func() {
+		_, err := redis.Set("gr::number", "3")
+
 		r, err := redis.DecrBy("gr::number", 2)
 		if err != nil || r != 1 {
 			t.Fail()
@@ -254,8 +262,9 @@ func TestMSetNxFail(t *testing.T) {
 
 func TestMGet(t *testing.T) {
 	test := func() {
-		r, err := redis.MGet("gr::one", "gr::two", "gr::three")
+		redis.MSet([]string{"gr::one", "1", "gr::two", "2", "gr::three", "3"}...)
 
+		r, err := redis.MGet("gr::one", "gr::two", "gr::three")
 		if err != nil {
 			t.Fail()
 		}
@@ -289,6 +298,8 @@ func TestMGetFail(t *testing.T) {
 
 func TestAppend(t *testing.T) {
 	test := func() {
+		redis.MSet([]string{"gr::one", "1", "gr::two", "2", "gr::three", "3"}...)
+
 		r, err := redis.Append("gr::two", "-dos")
 		if err != nil || r != 5 {
 			t.Fail()
@@ -302,6 +313,8 @@ func TestAppend(t *testing.T) {
 
 func TestBitCount(t *testing.T) {
 	test := func() {
+		redis.MSet([]string{"gr::one", "1", "gr::two", "2", "gr::three", "3"}...)
+
 		r, err := redis.BitCount("gr::one")
 		if err != nil || r != 3 {
 			t.Fail()
@@ -315,6 +328,8 @@ func TestBitCount(t *testing.T) {
 
 func TestBitOp(t *testing.T) {
 	test := func() {
+		redis.MSet([]string{"gr::one", "1", "gr::two", "2-dos", "gr::three", "3"}...)
+
 		_, err := redis.BitOp(AND, "gr::one", "gr::two")
 		if err != nil {
 			t.Fail()
@@ -346,6 +361,8 @@ func TestBitOpFail(t *testing.T) {
 
 func TestBitPos(t *testing.T) {
 	test := func() {
+		redis.MSet([]string{"gr::one", "1", "gr::two", "2-dos", "gr::three", "3"}...)
+
 		_, err := redis.BitPos("gr::one", true)
 		if err != nil {
 			t.Fail()
@@ -369,6 +386,8 @@ func TestBitPos(t *testing.T) {
 
 func TestGetBit(t *testing.T) {
 	test := func() {
+		redis.MSet([]string{"gr::one", "1", "gr::two", "2-dos", "gr::three", "3"}...)
+
 		r, err := redis.GetBit("gr::one", 2)
 		if err != nil || r != 1 {
 			t.Fail()
@@ -382,6 +401,8 @@ func TestGetBit(t *testing.T) {
 
 func TestGetRange(t *testing.T) {
 	test := func() {
+		redis.Set("gr::father", "Hernan")
+
 		r, err := redis.GetRange("gr::father", 0, 2)
 		if err != nil || r != "Her" {
 			t.Fail()
@@ -458,7 +479,9 @@ func TestSetBit(t *testing.T) {
 
 func TestSetRange(t *testing.T) {
 	test := func() {
-		r, err := redis.SetRange("gr::one", 0, "2")
+		redis.Set("gr::one", "test")
+		
+		r, err := redis.SetRange("gr::one", 4, "s")
 		if err != nil || r != 5 {
 			t.Fail()
 		}
@@ -471,6 +494,8 @@ func TestSetRange(t *testing.T) {
 
 func TestStrLen(t *testing.T) {
 	test := func() {
+		redis.Set("gr::one", "tests")
+
 		r, err := redis.StrLen("gr::one")
 		if err != nil || r != 5 {
 			t.Fail()
