@@ -22,7 +22,7 @@ func rLPush(key string, values ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile2("LPUSH", key, values...), nil
+	return multiCompile(append([]string{"LPUSH", key}, values...)...), nil
 }
 
 func rLPushX(key string, value string) [][]byte {
@@ -38,7 +38,7 @@ func rRPush(key string, values ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile2("RPUSH", key, values...), nil
+	return multiCompile(append([]string{"RPUSH", key}, values...)...), nil
 }
 
 func rRPushX(key string, value string) [][]byte {
@@ -94,7 +94,7 @@ func rBLPop(timeout int, keys ...string) ([][]byte, error) {
 	values = append(values, keys...)
 	values = append(values, strT)
 
-	return multiCompile1("BLPOP", values...), nil
+	return multiCompile(append([]string{"BLPOP"}, values...)...), nil
 }
 
 func rBRPop(timeout int, keys ...string) ([][]byte, error) {
@@ -109,7 +109,7 @@ func rBRPop(timeout int, keys ...string) ([][]byte, error) {
 	values = append(values, keys...)
 	values = append(values, strT)
 
-	return multiCompile1("BRPOP", values...), nil
+	return multiCompile(append([]string{"BRPOP"}, values...)...), nil
 }
 
 func rBRPopLPush(source string, destination string, timeout int) [][]byte {

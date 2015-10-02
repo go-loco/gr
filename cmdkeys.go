@@ -10,7 +10,7 @@ func rDel(keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile1("DEL", keys...), nil
+	return multiCompile(append([]string{"DEL"}, keys...)...), nil
 }
 
 func rDump(key string) [][]byte {
@@ -67,15 +67,15 @@ func rMove(key string, db string) [][]byte {
 }
 
 func rObjectEncoding(arguments ...string) [][]byte {
-	return multiCompile2("OBJECT", "ENCODING", arguments...)
+	return multiCompile(append([]string{"OBJECT", "ENCODING"}, arguments...)...)
 }
 
 func rObjectRefCount(arguments ...string) [][]byte {
-	return multiCompile2("OBJECT", "REFCOUNT", arguments...)
+	return multiCompile(append([]string{"OBJECT", "REFCOUNT"}, arguments...)...)
 }
 
 func rObjectIdleTime(arguments ...string) [][]byte {
-	return multiCompile2("OBJECT", "IDLETIME", arguments...)
+	return multiCompile(append([]string{"OBJECT", "IDLETIME"}, arguments...)...)
 }
 
 func rPersist(key string) [][]byte {
@@ -121,7 +121,7 @@ func rScan(cursor int, scanParams *ScanParams) [][]byte {
 		return multiCompile("SCAN", strconv.Itoa(cursor))
 	}
 
-	m := multiCompile2("SCAN", strconv.Itoa(cursor), scanParams.params...)
+	m := multiCompile(append([]string{"SCAN", strconv.Itoa(cursor)}, scanParams.params...)...)
 	//debugCmds(m)
 	return m
 }
@@ -132,7 +132,7 @@ func rSort(key string, sortingParams *SortParams) [][]byte {
 		return multiCompile("SORT", key)
 	}
 
-	return multiCompile2("SORT", key, sortingParams.params...)
+	return multiCompile(append([]string{"SORT", key}, sortingParams.params...)...)
 }
 
 func rSortStore(key string, destination string, sortingParams *SortParams) [][]byte {
@@ -141,7 +141,7 @@ func rSortStore(key string, destination string, sortingParams *SortParams) [][]b
 		return multiCompile("SORT", key, "STORE", destination)
 	}
 
-	return multiCompile4("SORT", key, "STORE", destination, sortingParams.params...)
+	return multiCompile(append([]string{"SORT", key, "STORE", destination}, sortingParams.params...)...)
 }
 
 func rTTL(key string) [][]byte {

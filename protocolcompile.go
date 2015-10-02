@@ -39,56 +39,6 @@ func multiCompile(values ...string) [][]byte {
 	return r
 }
 
-func multiCompile1(v1 string, values ...string) [][]byte {
-	r := make([][]byte, len(values)+1)
-	r[0] = compileBulkString(v1)
-
-	for i, v := range values {
-		r[i+1] = compileBulkString(v)
-	}
-
-	return r
-}
-
-func multiCompile2(v1 string, v2 string, values ...string) [][]byte {
-	r := make([][]byte, len(values)+2)
-	r[0] = compileBulkString(v1)
-	r[1] = compileBulkString(v2)
-
-	for i, v := range values {
-		r[i+2] = compileBulkString(v)
-	}
-
-	return r
-}
-
-func multiCompile3(v1 string, v2 string, v3 string, values ...string) [][]byte {
-	r := make([][]byte, len(values)+3)
-	r[0] = compileBulkString(v1)
-	r[1] = compileBulkString(v2)
-	r[2] = compileBulkString(v3)
-
-	for i, v := range values {
-		r[i+3] = compileBulkString(v)
-	}
-
-	return r
-}
-
-func multiCompile4(v1 string, v2 string, v3 string, v4 string, values ...string) [][]byte {
-	r := make([][]byte, len(values)+4)
-	r[0] = compileBulkString(v1)
-	r[1] = compileBulkString(v2)
-	r[2] = compileBulkString(v3)
-	r[3] = compileBulkString(v4)
-
-	for i, v := range values {
-		r[i+4] = compileBulkString(v)
-	}
-
-	return r
-}
-
 func debugCmds(cmds [][]byte) {
 
 	println("")
