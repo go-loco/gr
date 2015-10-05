@@ -510,12 +510,13 @@ func TestStrLen(t *testing.T) {
 func TestStringsPipelined(t *testing.T) {
 	test := func() {
 		var s1, s2, s3, s4, s5, s6, s7 *RespString
-		var i1, i2, i3, i4, i5 *RespInt
+		var i2, i3, i4, i5 *RespInt
 		var f *RespFloat
+		var b1 *RespBool
 
 		err := redis.Pipelined(func(p *Pipeline) {
 			s1 = p.Set("gr::father", "Hernan")
-			i1 = p.SetNx("gr::it doesn't exist", "??")
+			b1 = p.SetNx("gr::it doesn't exist", "??")
 
 			s2 = p.Get("gr::father")
 			s3 = p.GetSet("gr::father", "Hernán Di Chello")

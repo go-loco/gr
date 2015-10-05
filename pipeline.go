@@ -115,8 +115,8 @@ func (p *Pipeline) Rename(key string, newKey string) *RespString {
 	return p.enqueueStr(rRename(key, newKey))
 }
 
-func (p *Pipeline) RenameNx(key string, newKey string) *RespString {
-	return p.enqueueStr(rRenameNx(key, newKey))
+func (p *Pipeline) RenameNx(key string, newKey string) *RespBool {
+	return p.enqueueBool(rRenameNx(key, newKey))
 }
 
 func (p *Pipeline) Restore(key string, ttl int, value string, replace bool) *RespString {
@@ -275,8 +275,8 @@ func (p *Pipeline) SetBit(key string, offset int, value bool) *RespInt {
 	return p.enqueueInt(rSetBit(key, offset, value))
 }
 
-func (p *Pipeline) SetNx(key string, value string) *RespInt {
-	return p.enqueueInt(rSetNx(key, value))
+func (p *Pipeline) SetNx(key string, value string) *RespBool {
+	return p.enqueueBool(rSetNx(key, value))
 }
 
 func (p *Pipeline) SetRange(key string, offset int, value string) *RespInt {
@@ -517,8 +517,8 @@ func (p *Pipeline) HDel(key string, fields ...string) *RespInt {
 	return p.enqueueInt(rs)
 }
 
-func (p *Pipeline) HExists(key string, field string) *RespInt {
-	return p.enqueueInt(rHExists(key, field))
+func (p *Pipeline) HExists(key string, field string) *RespBool {
+	return p.enqueueBool(rHExists(key, field))
 }
 
 func (p *Pipeline) HGet(key string, field string) *RespString {
@@ -569,8 +569,8 @@ func (p *Pipeline) HSet(key string, field string, value string) *RespInt {
 	return p.enqueueInt(rHSet(key, field, value))
 }
 
-func (p *Pipeline) HSetNx(key string, field string, value string) *RespInt {
-	return p.enqueueInt(rHSetNx(key, field, value))
+func (p *Pipeline) HSetNx(key string, field string, value string) *RespBool {
+	return p.enqueueBool(rHSetNx(key, field, value))
 }
 
 /* Since 3.2.0
