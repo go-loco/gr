@@ -7,7 +7,8 @@ func rSAdd(key string, values ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile(append([]string{"SADD", key}, values...)...), nil
+	cmds := append([]string{"SADD", key}, values...)
+	return multiCompile(cmds...), nil
 }
 
 func rSCard(key string) [][]byte {
@@ -19,7 +20,8 @@ func rSDiff(keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile(append([]string{"SDIFF"}, keys...)...), nil
+	cmds := append([]string{"SDIFF"}, keys...)
+	return multiCompile(cmds...), nil
 }
 
 func rSDiffStore(key string, keys ...string) ([][]byte, error) {
@@ -27,7 +29,8 @@ func rSDiffStore(key string, keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile(append([]string{"SDIFFSTORE", key}, keys...)...), nil
+	cmds := append([]string{"SDIFFSTORE", key}, keys...)
+	return multiCompile(cmds...), nil
 }
 
 func rSInter(keys ...string) ([][]byte, error) {
@@ -35,7 +38,8 @@ func rSInter(keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile(append([]string{"SINTER"}, keys...)...), nil
+	cmds := append([]string{"SINTER"}, keys...)
+	return multiCompile(cmds...), nil
 }
 
 func rSInterStore(key string, keys ...string) ([][]byte, error) {
@@ -43,26 +47,27 @@ func rSInterStore(key string, keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile(append([]string{"SINTERSTORE", key}, keys...)...), nil
+	cmds := append([]string{"SINTERSTORE", key}, keys...)
+	return multiCompile(cmds...), nil
 }
 
-func rSIsMember(key string, value string) ([][]byte) {
+func rSIsMember(key string, value string) [][]byte {
 	return multiCompile("SISMEMBER", key, value)
 }
 
-func rSMembers(key string) ([][]byte) {
+func rSMembers(key string) [][]byte {
 	return multiCompile("SMEMBERS", key)
 }
 
-func rSMove(sourceKey, destinationKey, value string) ([][]byte) {
+func rSMove(sourceKey, destinationKey, value string) [][]byte {
 	return multiCompile("SMOVE", sourceKey, destinationKey, value)
 }
 
-func rSPop(key string) ([][]byte) {
+func rSPop(key string) [][]byte {
 	return multiCompile("SPOP", key)
 }
 
-func rSRandMember(key string, count int) ([][]byte) {
+func rSRandMember(key string, count int) [][]byte {
 	return multiCompile("SRANDMEMBER", key, strconv.Itoa(count))
 }
 
@@ -70,8 +75,9 @@ func rSRem(key string, values ...string) ([][]byte, error) {
 	if len(values) < 1 {
 		return nil, NotEnoughParamsErr
 	}
-	
-	return multiCompile(append([]string{"SREM", key}, values...)...), nil
+
+	cmds := append([]string{"SREM", key}, values...)
+	return multiCompile(cmds...), nil
 }
 
 func rSScan(key string, cursor int, scanParams *ScanParams) [][]byte {
@@ -79,7 +85,8 @@ func rSScan(key string, cursor int, scanParams *ScanParams) [][]byte {
 		return multiCompile("SSCAN", key, strconv.Itoa(cursor))
 	}
 
-	return multiCompile(append([]string{"SSCAN", key, strconv.Itoa(cursor)}, scanParams.params...)...)
+	cmds := append([]string{"SSCAN", key, strconv.Itoa(cursor)}, scanParams.params...)
+	return multiCompile(cmds...)
 }
 
 func rSUnion(keys ...string) ([][]byte, error) {
@@ -87,7 +94,8 @@ func rSUnion(keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile(append([]string{"SUNION"}, keys...)...), nil
+	cmds := append([]string{"SUNION"}, keys...)
+	return multiCompile(cmds...), nil
 }
 
 func rSUnionStore(key string, keys ...string) ([][]byte, error) {
@@ -95,5 +103,6 @@ func rSUnionStore(key string, keys ...string) ([][]byte, error) {
 		return nil, NotEnoughParamsErr
 	}
 
-	return multiCompile(append([]string{"SUNIONSTORE", key}, keys...)...), nil
+	cmds := append([]string{"SUNIONSTORE", key}, keys...)
+	return multiCompile(cmds...), nil
 }

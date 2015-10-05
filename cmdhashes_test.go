@@ -65,7 +65,7 @@ func TestHGetAll(t *testing.T) {
 func TestHIncrBy(t *testing.T) {
 	test := func() {
 		redis.HSet("gr::myhash", "number", "2")
-		
+
 		r, err := redis.HIncrBy("gr::myhash", "number", 2)
 		if err != nil || r != 4 {
 			t.Fail()
@@ -292,7 +292,7 @@ func TestHDel(t *testing.T) {
 		redis.HSet("gr::myhash", "father", "Darth")
 		redis.HSet("gr::myhash", "son", "Luke")
 		redis.HSet("gr::myhash", "number", "4")
-		
+
 		if _, err := redis.HDel("gr::myhash", "father"); err != nil {
 			t.Fail()
 		}

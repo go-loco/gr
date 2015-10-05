@@ -17,6 +17,7 @@ func TestLPushWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
+	print(".")
 }
 
 func TestLPush(t *testing.T) {

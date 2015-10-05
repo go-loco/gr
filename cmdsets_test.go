@@ -2,8 +2,8 @@ package gr
 
 import (
 	"log"
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestSetsBegin(t *testing.T) {
@@ -18,6 +18,8 @@ func TestSAddWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
+
+	print(".")
 }
 
 func TestSAdd(t *testing.T) {
@@ -36,7 +38,6 @@ func TestSAdd(t *testing.T) {
 func TestSCard(t *testing.T) {
 	test := func() {
 		redis.SAdd("gr::myset::scard", "1", "2", "3")
-		
 		r, err := redis.SCard("gr::myset::scard")
 		if err != nil || r != 3 {
 			t.Fail()
@@ -67,7 +68,7 @@ func TestSDiff(t *testing.T) {
 
 		if r, err := redis.SDiff("gr::myset::sdiff", "gr::myotherset::sdiff"); err != nil {
 			t.Fail()
-		
+
 		} else {
 			if !reflect.DeepEqual(r, []string{"b"}) {
 				t.Fail()
@@ -127,7 +128,7 @@ func TestSInter(t *testing.T) {
 
 		if r, err := redis.SInter("gr::myset::sinter", "gr::myotherset::sinter"); err != nil {
 			t.Fail()
-		
+
 		} else {
 			if !reflect.DeepEqual(r, []string{"c"}) {
 				t.Fail()
@@ -171,7 +172,7 @@ func TestSInterStore(t *testing.T) {
 func TestSIsMember(t *testing.T) {
 	test := func() {
 		redis.SAdd("gr::myset::sismember", "a", "b", "c", "d")
-		
+
 		r, err := redis.SIsMember("gr::myset::sismember", "a")
 		if err != nil || !r {
 			t.Fail()
@@ -186,7 +187,7 @@ func TestSIsMember(t *testing.T) {
 func TestSMembers(t *testing.T) {
 	test := func() {
 		redis.SAdd("gr::myset::smembers", "a", "b", "c", "d")
-		
+
 		r, err := redis.SMembers("gr::myset::smembers")
 		if err != nil || len(r) != 4 {
 			t.Fail()
@@ -202,7 +203,7 @@ func TestSMove(t *testing.T) {
 	test := func() {
 		redis.SAdd("gr::myset::smove", "a", "b")
 		redis.SAdd("gr::myotherset::smove", "c", "d")
-		
+
 		r, err := redis.SMove("gr::myset::smove", "gr::myotherset::smove", "a")
 		if err != nil || !r {
 			t.Fail()
@@ -217,7 +218,7 @@ func TestSMove(t *testing.T) {
 func TestSPop(t *testing.T) {
 	test := func() {
 		redis.SAdd("gr::myset::spop", "a", "b", "c", "d")
-		
+
 		r, err := redis.SPop("gr::myset::spop")
 		if err != nil || r == "" {
 			t.Fail()
@@ -232,7 +233,7 @@ func TestSPop(t *testing.T) {
 func TestSRandMember(t *testing.T) {
 	test := func() {
 		redis.SAdd("gr::myset::srandmember", "a", "b", "c", "d")
-		
+
 		r, err := redis.SRandMember("gr::myset::srandmember", 1)
 		if err != nil || len(r) != 1 {
 			t.Fail()
@@ -264,7 +265,7 @@ func TestSRemWrongParams(t *testing.T) {
 func TestSRem(t *testing.T) {
 	test := func() {
 		redis.SAdd("gr::myset::srem", "a", "b", "c", "d")
-		
+
 		r, err := redis.SRem("gr::myset::srem", "c", "d")
 		if err != nil || r != 2 {
 			t.Fail()
