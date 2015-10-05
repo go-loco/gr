@@ -480,7 +480,7 @@ func TestSetBit(t *testing.T) {
 func TestSetRange(t *testing.T) {
 	test := func() {
 		redis.Set("gr::one", "test")
-		
+
 		r, err := redis.SetRange("gr::one", 4, "s")
 		if err != nil || r != 5 {
 			t.Fail()

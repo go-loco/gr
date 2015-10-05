@@ -1,10 +1,10 @@
 package gr
 
 import (
-	"log"
-	"testing"
 	"errors"
+	"log"
 	"os"
+	"testing"
 )
 
 type testCase func()
@@ -12,15 +12,15 @@ type testCase func()
 var redis *Redis
 
 func TestMain(m *testing.M) {
-    log.Println("Init test")
+	log.Println("Init test")
 
-    setup()
+	setup()
 
-    code := m.Run()
+	code := m.Run()
 
-    teardown()
+	teardown()
 
-    os.Exit(code)
+	os.Exit(code)
 }
 
 func setup() {

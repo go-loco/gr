@@ -386,7 +386,7 @@ func TestObjectIdleTime(t *testing.T) {
 		redis.Set("gr::object", "object")
 
 		time.Sleep(1200 * time.Millisecond)
-		
+
 		r, err := redis.ObjectIdleTime("gr::object")
 		if err != nil || r != 1 {
 			t.Fail()
@@ -456,7 +456,7 @@ func TestWait(t *testing.T) {
 func TestMigrate(t *testing.T) {
 	test := func() {
 		redis.Set("gr::father", "Darth")
-		
+
 		r, err := redis.Migrate("localhost", 7000, "gr::father", "0", 500, true, true)
 		if err != nil || r != "OK" {
 			t.Fail()
