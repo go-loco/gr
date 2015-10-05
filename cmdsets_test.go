@@ -57,7 +57,6 @@ func TestSDiffWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
 	print(".")
 }
 
@@ -364,18 +363,18 @@ func TestSetsPipelined(t *testing.T) {
 
 		err := redis.Pipelined(func(p *Pipeline) {
 			sAdd = p.SAdd("gr::pipeline::myset::sadd", "1", "2")
-			
+
 			p.SAdd("gr::pipeline::myset::scard", "1", "2", "3")
 			sCard = p.SCard("gr::pipeline::myset::scard")
 
 			p.SAdd("gr::pipeline::myset::sdiff", "a", "b", "c", "d")
 			p.SAdd("gr::pipeline::myotherset::sdiff", "a", "c", "d")
 			sDiff = p.SDiff("gr::pipeline::myset::sdiff", "gr::pipeline::myotherset::sdiff")
-		
+
 			p.SAdd("gr::pipeline::myset::sdiffstore", "a", "b", "c", "d")
 			p.SAdd("gr::pipeline::myotherset::sdiffstore", "a", "c")
 			sDiffStore = p.SDiffStore("gr::pipeline::myresultset::sdiffstore", "gr::pipeline::myset::sdiffstore", "gr::pipeline::myotherset::sdiffstore")
-		
+
 			p.SAdd("gr::pipeline::myset::sinter", "a", "b", "c", "d")
 			p.SAdd("gr::pipeline::myotherset::sinter", "c")
 			sInter = p.SInter("gr::pipeline::myset::sinter", "gr::pipeline::myotherset::sinter")
@@ -389,10 +388,10 @@ func TestSetsPipelined(t *testing.T) {
 
 			p.SAdd("gr::pipeline::myset::smembers", "a", "b", "c", "d")
 			sMembers = p.SMembers("gr::pipeline::myset::smembers")
-		
+
 			p.SAdd("gr::pipeline::myset::smove", "a", "b")
 			p.SAdd("gr::pipeline::myotherset::smove", "c", "d")
-		    sMove = p.SMove("gr::pipeline::myset::smove", "gr::pipeline::myotherset::smove", "a")
+			sMove = p.SMove("gr::pipeline::myset::smove", "gr::pipeline::myotherset::smove", "a")
 
 			p.SAdd("gr::pipeline::myset::spop", "a", "b", "c", "d")
 			sPop = p.SPop("gr::pipeline::myset::spop")
@@ -426,7 +425,7 @@ func TestSetsPipelined(t *testing.T) {
 
 		if sDiff.Error != nil {
 			t.Fail()
-		
+
 		} else {
 			if !reflect.DeepEqual(sDiff.Value, []string{"b"}) {
 				t.Fail()
@@ -439,7 +438,7 @@ func TestSetsPipelined(t *testing.T) {
 
 		if sInter.Error != nil {
 			t.Fail()
-		
+
 		} else {
 			if !reflect.DeepEqual(sInter.Value, []string{"c"}) {
 				t.Fail()
