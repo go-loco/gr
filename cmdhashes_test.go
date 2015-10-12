@@ -1,8 +1,10 @@
-package gr
+package gr_test
 
 import (
 	"log"
 	"testing"
+
+	"github.com/xzip/gr"
 )
 
 func TestHashesBegin(t *testing.T) {
@@ -157,7 +159,7 @@ func TestHLen(t *testing.T) {
 
 func TestHMGetWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.HMGet("gr::myhash"); err != NotEnoughParamsErr {
+		if _, err := redis.HMGet("gr::myhash"); err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 	}
@@ -187,11 +189,11 @@ func TestHMGet(t *testing.T) {
 
 func TestHMSetWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.HMSet("gr::myhash"); err != NotEnoughParamsErr {
+		if _, err := redis.HMSet("gr::myhash"); err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 
-		if _, err := redis.HMSet("gr::myhash", "foo"); err != ParamsNotTuplesErr {
+		if _, err := redis.HMSet("gr::myhash", "foo"); err != gr.ParamsNotTuplesErr {
 			t.Fail()
 		}
 	}
@@ -264,7 +266,7 @@ func TestHScan(t *testing.T) {
 		}
 
 		/////
-		sp := new(ScanParams).Count(3).Match("father")
+		sp := new(gr.ScanParams).Count(3).Match("father")
 
 		_, rr, err := redis.HScan("gr::myhash", 0, sp)
 		if err != nil || len(rr) <= 0 {
@@ -279,7 +281,7 @@ func TestHScan(t *testing.T) {
 
 func TestHDelWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.HDel("gr::myhash"); err != NotEnoughParamsErr {
+		if _, err := redis.HDel("gr::myhash"); err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 	}
@@ -309,6 +311,52 @@ func TestHDel(t *testing.T) {
 	safeTestContext(test)
 
 	print(".")
+}
+
+func TestHashesPipelined(t *testing.T) {
+
+	safeTestContext(func() {
+
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			p.HSet("gr::myhash", "father", "Darth")
+
+			p.HSet("gr::myhash", "father", "Darth Vader")
+
+			p.HSet("gr::myhash", "son", "Luke Skywalker")
+			p.HGet("gr::myhash", "father")
+			p.HGetAll("gr::myhash")
+
+			p.HSet("gr::myhash", "number", "2")
+			p.HIncrBy("gr::myhash", "number", 2)
+
+			p.HSet("gr::myhash", "number", "4")
+			p.HIncrByFloat("gr::myhash", "number", 2.2)
+
+			p.HExists("gr::myhash", "father")
+
+			p.HKeys("gr::myhash")
+			p.HLen("gr::myhash")
+			//redis.HMGet("gr::myhash");
+
+			p.HMGet("gr::myhash", "father", "son")
+
+			// redis.HMSet("gr::myhash");
+			//redis.HMSet("gr::myhash", "foo");
+
+			p.HMSet("gr::numbers", "one", "1", "two", "2")
+			p.HSetNx("gr::new_hash_key", "one", "1")
+
+			p.HVals("gr::myhash")
+
+			p.HDel("gr::myhash", "father")
+		})
+
+		if err != nil {
+			t.Fail()
+		}
+
+		print(".")
+	})
 }
 
 func TestHashesEnd(t *testing.T) {

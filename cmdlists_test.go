@@ -1,8 +1,10 @@
-package gr
+package gr_test
 
 import (
 	"log"
 	"testing"
+
+	"github.com/xzip/gr"
 )
 
 func TestListsBegin(t *testing.T) {
@@ -11,7 +13,7 @@ func TestListsBegin(t *testing.T) {
 
 func TestLPushWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.LPush("gr::mylist"); err != NotEnoughParamsErr {
+		if _, err := redis.LPush("gr::mylist"); err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 	}
@@ -50,7 +52,7 @@ func TestLPushX(t *testing.T) {
 
 func TestRPushWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.RPush("gr::mylist"); err != NotEnoughParamsErr {
+		if _, err := redis.RPush("gr::mylist"); err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 	}
@@ -165,7 +167,7 @@ func TestLSet(t *testing.T) {
 
 func TestLInsertWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.LInsert("gr::mylist", 3, "foo", "foo"); err != ParamErr {
+		if _, err := redis.LInsert("gr::mylist", 3, "foo", "foo"); err != gr.ParamErr {
 			t.Fail()
 		}
 	}
@@ -177,12 +179,12 @@ func TestLInsert(t *testing.T) {
 	test := func() {
 		redis.LPush("gr::mylist", "10", "6", "5", "4", "3", "2", "1")
 
-		r, err := redis.LInsert("gr::mylist", Before, "10", "11")
+		r, err := redis.LInsert("gr::mylist", gr.Before, "10", "11")
 		if err != nil || r == -1 {
 			t.Fail()
 		}
 
-		r, err = redis.LInsert("gr::mylist", After, "11", "12")
+		r, err = redis.LInsert("gr::mylist", gr.After, "11", "12")
 		if err != nil || r == -1 {
 			t.Fail()
 		}
@@ -225,7 +227,7 @@ func TestBRPopLPush(t *testing.T) {
 
 func TestBLPopWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.BLPop(0); err != NotEnoughParamsErr {
+		if _, err := redis.BLPop(0); err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 	}
@@ -250,7 +252,7 @@ func TestBLPop(t *testing.T) {
 
 func TestBRPopWrongParams(t *testing.T) {
 	test := func() {
-		if _, err := redis.BRPop(0); err != NotEnoughParamsErr {
+		if _, err := redis.BRPop(0); err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 	}
@@ -314,6 +316,45 @@ func TestLTrim(t *testing.T) {
 	}
 
 	safeTestContext(test)
+
+	print(".")
+}
+
+func TestListsPipelined(t *testing.T) {
+
+	safeTestContext(func() {
+
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			//p.LPush("gr::mylist")
+			p.LPush("gr::mylist", "3", "2")
+			p.LPushX("gr::mylist", "1")
+			//p.RPush("gr::mylist")
+			p.RPush("gr::mylist", "4", "5")
+			p.RPushX("gr::mylist", "6")
+			p.LLen("gr::mylist")
+			p.LIndex("gr::mylist", 2)
+			p.LPop("gr::mylist")
+			p.RPop("gr::mylist")
+			p.LSet("gr::mylist", 0, "10")
+			//p.LInsert("gr::mylist", 3, "foo", "foo")
+			p.LInsert("gr::mylist", gr.Before, "10", "11")
+			//p.LInsert("gr::mylist", gr.After, "11", "12")
+			p.RPopLPush("gr::mylist", "my_other_list")
+			p.BRPopLPush("gr::mylist", "my_other_list", 0)
+			//p.BLPop(0)
+			p.BLPop(0, "gr::mylist")
+			//p.BRPop(0)
+			p.BRPop(0, "gr::mylist")
+			p.LRange("gr::mylist", 0, -1)
+			p.LRem("gr::mylist", 0, "10")
+			p.LTrim("gr::mylist", 0, 2)
+		})
+
+		if err != nil {
+			t.Fail()
+		}
+
+	})
 
 	print(".")
 }

@@ -11,8 +11,7 @@ type RespString struct {
 }
 
 func (rs *RespString) set(rr *redisResponse) {
-	result, _ := readString(rr, nil)
-	rs.Value = result
+	rs.Value, rs.Error = readString(rr, nil)
 }
 
 //String Array
@@ -22,8 +21,7 @@ type RespStringArray struct {
 }
 
 func (rs *RespStringArray) set(b *redisResponse) {
-	result, _ := readStringArray(b, nil)
-	rs.Value = result
+	rs.Value, rs.Error = readStringArray(b, nil)
 }
 
 //Int
@@ -33,8 +31,7 @@ type RespInt struct {
 }
 
 func (rs *RespInt) set(b *redisResponse) {
-	result, _ := readInt64(b, nil)
-	rs.Value = result
+	rs.Value, rs.Error = readInt64(b, nil)
 }
 
 //Float
@@ -44,8 +41,7 @@ type RespFloat struct {
 }
 
 func (rs *RespFloat) set(b *redisResponse) {
-	result, _ := readFloat64(b, nil)
-	rs.Value = result
+	rs.Value, rs.Error = readFloat64(b, nil)
 }
 
 //Bool
@@ -55,6 +51,5 @@ type RespBool struct {
 }
 
 func (rs *RespBool) set(b *redisResponse) {
-	result, _ := readBool(b, nil)
-	rs.Value = result
+	rs.Value, rs.Error = readBool(b, nil)
 }

@@ -1,25 +1,25 @@
-package gr
+package gr_test
 
 import (
 	"errors"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/xzip/gr"
 )
 
 type testCase func()
 
-var redis *Redis
+var redis *gr.Redis
 
 func TestMain(m *testing.M) {
+
 	log.Println("Init test")
 
 	setup()
-
 	code := m.Run()
-
 	teardown()
-
 	os.Exit(code)
 }
 
@@ -27,7 +27,7 @@ func setup() {
 	log.Println("[Testing Connect]")
 
 	var err error
-	redis, err = New()
+	redis, err = gr.New()
 
 	if err != nil {
 		panic(err)

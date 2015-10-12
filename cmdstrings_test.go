@@ -1,11 +1,13 @@
-package gr
+package gr_test
 
 import (
 	"fmt"
 	"log"
-	"strconv"
+	"reflect"
 	"testing"
 	"time"
+
+	"github.com/xzip/gr"
 )
 
 func TestStringsBegin(t *testing.T) {
@@ -14,7 +16,7 @@ func TestStringsBegin(t *testing.T) {
 
 func TestSet(t *testing.T) {
 	test := func() {
-		r, err := redis.Set("gr::father", "Hernan")
+		r, err := redis.Set("gr::father", "Darth Vader")
 
 		if err != nil || r != "OK" {
 			t.Fail()
@@ -43,10 +45,10 @@ func TestSetNx(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	test := func() {
-		redis.Set("gr::father", "Hernan")
+		redis.Set("gr::father", "Darth Vader")
 
 		r, err := redis.Get("gr::father")
-		if err != nil || r != "Hernan" {
+		if err != nil || r != "Darth Vader" {
 			t.Fail()
 		}
 	}
@@ -58,10 +60,10 @@ func TestGet(t *testing.T) {
 
 func TestSetGet(t *testing.T) {
 	test := func() {
-		redis.Set("gr::father", "Hernan")
+		redis.Set("gr::father", "Darth Vader")
 
-		r, err := redis.GetSet("gr::father", "Hernán Di Chello")
-		if err != nil || r != "Hernan" {
+		r, err := redis.GetSet("gr::father", "Anakin")
+		if err != nil || r != "Darth Vader" {
 			t.Fail()
 		}
 	}
@@ -73,8 +75,8 @@ func TestSetGet(t *testing.T) {
 
 func TestSetX(t *testing.T) {
 	test := func() {
-		k := KeyExpiration{2, Seconds}
-		q := MustNotExist
+		k := gr.KeyExpiration{2, gr.Seconds}
+		q := gr.MustNotExist
 
 		r, err := redis.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
 
@@ -90,12 +92,12 @@ func TestSetX(t *testing.T) {
 
 func TestSetXFail(t *testing.T) {
 	test := func() {
-		k := KeyExpiration{2, 3}
-		q := MustExist
+		k := gr.KeyExpiration{2, 3}
+		q := gr.MustExist
 
 		_, err := redis.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
 
-		if err != ParamErr {
+		if err != gr.ParamErr {
 			t.Fail()
 		}
 	}
@@ -109,7 +111,7 @@ func TestGetNil(t *testing.T) {
 	test := func() {
 		_, err := redis.Get("gr::i am sure this is not a key")
 
-		if err != NilErr {
+		if err != gr.NilErr {
 			t.Fail()
 		}
 	}
@@ -210,13 +212,13 @@ func TestMSet(t *testing.T) {
 func TestMSetFail(t *testing.T) {
 	test := func() {
 		_, err := redis.MSet()
-		if err != NotEnoughParamsErr {
+		if err != gr.NotEnoughParamsErr {
 			t.Fail()
 			fmt.Println(err)
 		}
 
 		_, err = redis.MSet("foo")
-		if err != ParamsNotTuplesErr {
+		if err != gr.ParamsNotTuplesErr {
 			t.Fail()
 			fmt.Println(err)
 		}
@@ -243,13 +245,13 @@ func TestMSetNx(t *testing.T) {
 func TestMSetNxFail(t *testing.T) {
 	test := func() {
 		_, err := redis.MSetNx()
-		if err != NotEnoughParamsErr {
+		if err != gr.NotEnoughParamsErr {
 			t.Fail()
 			fmt.Println(err)
 		}
 
 		_, err = redis.MSetNx("foo")
-		if err != ParamsNotTuplesErr {
+		if err != gr.ParamsNotTuplesErr {
 			t.Fail()
 			fmt.Println(err)
 		}
@@ -262,20 +264,21 @@ func TestMSetNxFail(t *testing.T) {
 
 func TestMGet(t *testing.T) {
 	test := func() {
-		redis.MSet([]string{"gr::one", "1", "gr::two", "2", "gr::three", "3"}...)
+
+		testCase := []string{"gr::one", "1", "gr::two", "2", "gr::three", "3"}
+		testResult := []string{"1", "2", "3"}
+
+		redis.MSet(testCase...)
 
 		r, err := redis.MGet("gr::one", "gr::two", "gr::three")
 		if err != nil {
 			t.Fail()
 		}
 
-		i := 1
-		for _, s := range r {
-			if s != strconv.Itoa(i) {
-				t.Fail()
-			}
-			i++
+		if !reflect.DeepEqual(testResult, r) {
+			t.Fail()
 		}
+
 	}
 
 	safeTestContext(test)
@@ -286,7 +289,7 @@ func TestMGet(t *testing.T) {
 func TestMGetFail(t *testing.T) {
 	test := func() {
 		_, err := redis.MGet()
-		if err != NotEnoughParamsErr {
+		if err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 	}
@@ -330,7 +333,7 @@ func TestBitOp(t *testing.T) {
 	test := func() {
 		redis.MSet([]string{"gr::one", "1", "gr::two", "2-dos", "gr::three", "3"}...)
 
-		_, err := redis.BitOp(AND, "gr::one", "gr::two")
+		_, err := redis.BitOp(gr.AND, "gr::one", "gr::two")
 		if err != nil {
 			t.Fail()
 		}
@@ -343,13 +346,13 @@ func TestBitOp(t *testing.T) {
 
 func TestBitOpFail(t *testing.T) {
 	test := func() {
-		_, err := redis.BitOp(AND, "gr::one")
-		if err != NotEnoughParamsErr {
+		_, err := redis.BitOp(gr.AND, "gr::one")
+		if err != gr.NotEnoughParamsErr {
 			t.Fail()
 		}
 
 		_, err = redis.BitOp(10, "gr::one", "gr::two")
-		if err != ParamErr {
+		if err != gr.ParamErr {
 			t.Fail()
 		}
 	}
@@ -401,10 +404,10 @@ func TestGetBit(t *testing.T) {
 
 func TestGetRange(t *testing.T) {
 	test := func() {
-		redis.Set("gr::father", "Hernan")
+		redis.Set("gr::father", "Darth Vader")
 
 		r, err := redis.GetRange("gr::father", 0, 2)
-		if err != nil || r != "Her" {
+		if err != nil || r != "Dar" {
 			t.Fail()
 		}
 	}
@@ -429,7 +432,7 @@ func TestPSetEx(t *testing.T) {
 		time.Sleep(200 * time.Millisecond)
 
 		r, err = redis.Get("gr::volatile")
-		if err != NilErr {
+		if err != gr.NilErr {
 			t.Fail()
 		}
 	}
@@ -454,7 +457,7 @@ func TestSetEx(t *testing.T) {
 		time.Sleep(1100 * time.Millisecond)
 
 		r, err = redis.Get("gr::volatile")
-		if err != NilErr {
+		if err != gr.NilErr {
 			t.Fail()
 		}
 	}
@@ -508,57 +511,113 @@ func TestStrLen(t *testing.T) {
 }
 
 func TestStringsPipelined(t *testing.T) {
-	test := func() {
-		var s1, s2, s3, s4, s5, s6, s7 *RespString
-		var i2, i3, i4, i5 *RespInt
-		var f *RespFloat
-		var b1 *RespBool
 
-		err := redis.Pipelined(func(p *Pipeline) {
-			s1 = p.Set("gr::father", "Hernan")
+	safeTestContext(func() {
+
+		//	k := gr.KeyExpiration{2, 3}
+		//	q := gr.MustExist
+		//		s5 = p.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
+
+		var s [8]*gr.RespString
+		var i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15 *gr.RespInt
+		var f *gr.RespFloat
+		var b1, b2 *gr.RespBool
+		var sa1 *gr.RespStringArray
+
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			s[0] = p.Set("gr::father", "Darth Vader")
 			b1 = p.SetNx("gr::it doesn't exist", "??")
 
-			s2 = p.Get("gr::father")
-			s3 = p.GetSet("gr::father", "Hernán Di Chello")
+			s[1] = p.Get("gr::father")
+			s[2] = p.GetSet("gr::father", "Anakin")
 
-			k := KeyExpiration{2, Seconds}
-			q := MustNotExist
-			s4 = p.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
+			k := gr.KeyExpiration{2, gr.Seconds}
+			q := gr.MustNotExist
+			s[3] = p.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
 
-			s5 = p.Get("gr::i am sure this is not a key")
-			s6 = p.Set("gr::number", "1")
+			s[4] = p.Get("gr::i am sure this is not a key")
+
+			s[5] = p.Set("gr::number", "1")
 			i2 = p.Incr("gr::number")
 			i3 = p.IncrBy("gr::number", 2)
 			f = p.IncrByFloat("gr::number:float", 0.5)
 			i4 = p.Decr("gr::number")
 			i5 = p.DecrBy("gr::number", 2)
 
-			s7 = p.MSet("gr::one", "1", "gr::two", "2", "gr::three", "3")
+			s[6] = p.MSet("gr::one", "1", "gr::two", "2", "gr::three", "3")
 
-			p.MSetNx("gr::four", "4")
-			p.MGet("gr::one", "gr::two", "gr::three")
-			p.Append("gr::two", "-dos")
-			p.BitCount("gr::one")
-			p.BitOp(AND, "gr::one", "gr::two")
-			p.BitPos("gr::one", true)
-			p.BitPos("gr::one", true, 0)
-			p.BitPos("gr::one", true, 0, -1)
-			p.GetBit("gr::one", 2)
-			p.SetBit("gr::one", 1, true)
-			p.GetRange("gr::father", 0, 2)
-			p.SetRange("gr::one", 0, "2")
-			p.StrLen("gr::one")
+			b2 = p.MSetNx("gr::four", "4")
+			sa1 = p.MGet("gr::one", "gr::two", "gr::three")
+			i6 = p.Append("gr::two", "-dos")
+			i7 = p.BitCount("gr::one")
+			i8 = p.BitOp(gr.AND, "gr::one", "gr::two")
+			i9 = p.BitPos("gr::one", true)
+			i10 = p.BitPos("gr::one", true, 0)
+			i11 = p.BitPos("gr::one", true, 0, -1)
+			i12 = p.GetBit("gr::one", 2)
+			i13 = p.SetBit("gr::one", 1, true)
+			s[7] = p.GetRange("gr::father", 0, 2)
+			i14 = p.SetRange("gr::one", 0, "2")
+			i15 = p.StrLen("gr::one")
 
 			p.PSetEx("gr::volatile::ms", 100, "ninja")
 			p.SetEx("gr::volatile::s", 1, "ninja")
+
 		})
 
 		if err != nil {
 			t.Fail()
 		}
-	}
 
-	safeTestContext(test)
+		if s[0].Error != nil || s[0].Value != "OK" {
+			t.Fail()
+		}
+
+		if b1.Error != nil || !b1.Value {
+			t.Fail()
+		}
+
+		if s[1].Error != nil || s[1].Value != "Darth Vader" {
+			t.Fail()
+		}
+
+		if s[2].Error != nil || s[2].Value != "Darth Vader" {
+			t.Fail()
+		}
+
+		if s[3].Error != nil || s[3].Value != "OK" {
+			t.Fail()
+		}
+
+		if s[4].Error != gr.NilErr {
+			t.Fail()
+		}
+
+		if s[5].Error != nil || s[5].Value != "OK" {
+			t.Fail()
+		}
+
+		if i2.Error != nil || i2.Value != 2 {
+			t.Fail()
+		}
+
+		if i3.Error != nil || i3.Value != 4 {
+			t.Fail()
+		}
+
+		if f.Error != nil || f.Value != 0.5 {
+			t.Fail()
+		}
+
+		if i4.Error != nil || i4.Value != 3 {
+			t.Fail()
+		}
+
+		if i5.Error != nil || i5.Value != 1 {
+			t.Fail()
+		}
+
+	})
 
 	print(".")
 }

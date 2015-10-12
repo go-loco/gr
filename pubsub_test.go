@@ -1,10 +1,12 @@
-package gr
+package gr_test
 
 import (
 	"log"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/xzip/gr"
 )
 
 func TestPubSubBegin(t *testing.T) {
@@ -49,7 +51,7 @@ func pub(goThread string) {
 
 func sub(pattern bool) {
 
-	f := func(ps *PubSub) {
+	f := func(ps *gr.PubSub) {
 		for i := 0; i < 1000; i++ {
 			<-ps.Message
 		}

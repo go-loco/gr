@@ -1,8 +1,10 @@
-package gr
+package gr_test
 
 import (
 	"strconv"
 	"testing"
+
+	"github.com/xzip/gr"
 
 	//gosexy "github.com/gosexy/redis"
 )
@@ -190,7 +192,7 @@ func BenchmarkGrRedisLRange100(b *testing.B) {
 
 func BenchmarkPipelineGet(b *testing.B) {
 
-	redis.Pipelined(func(p *Pipeline) {
+	redis.Pipelined(func(p *gr.Pipeline) {
 
 		for i := 0; i < b.N; i++ {
 			p.Get("family:father")
