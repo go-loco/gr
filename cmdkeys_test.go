@@ -388,10 +388,10 @@ func TestObjectIdleTime(t *testing.T) {
 	test := func() {
 		redis.Set("gr::object", "object")
 
-		time.Sleep(1200 * time.Millisecond)
+		time.Sleep(1100 * time.Millisecond)
 
 		r, err := redis.ObjectIdleTime("gr::object")
-		if err != nil || r != 1 {
+		if err != nil || r < 1 {
 			t.Fail()
 		}
 	}

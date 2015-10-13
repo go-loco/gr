@@ -24,8 +24,6 @@ func TestSet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetNx(t *testing.T) {
@@ -39,8 +37,6 @@ func TestSetNx(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestGet(t *testing.T) {
@@ -54,8 +50,6 @@ func TestGet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetGet(t *testing.T) {
@@ -69,8 +63,6 @@ func TestSetGet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetX(t *testing.T) {
@@ -86,8 +78,6 @@ func TestSetX(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetXFail(t *testing.T) {
@@ -103,8 +93,6 @@ func TestSetXFail(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestGetNil(t *testing.T) {
@@ -117,8 +105,6 @@ func TestGetNil(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestIncr(t *testing.T) {
@@ -132,8 +118,6 @@ func TestIncr(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestIncrBy(t *testing.T) {
@@ -147,8 +131,6 @@ func TestIncrBy(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestIncrByfloat(t *testing.T) {
@@ -160,8 +142,6 @@ func TestIncrByfloat(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestDecr(t *testing.T) {
@@ -175,8 +155,6 @@ func TestDecr(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestDecrBy(t *testing.T) {
@@ -190,8 +168,6 @@ func TestDecrBy(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestMSet(t *testing.T) {
@@ -205,8 +181,6 @@ func TestMSet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestMSetFail(t *testing.T) {
@@ -225,8 +199,6 @@ func TestMSetFail(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestMSetNx(t *testing.T) {
@@ -238,8 +210,6 @@ func TestMSetNx(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestMSetNxFail(t *testing.T) {
@@ -258,8 +228,6 @@ func TestMSetNxFail(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestMGet(t *testing.T) {
@@ -282,8 +250,6 @@ func TestMGet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestMGetFail(t *testing.T) {
@@ -295,8 +261,6 @@ func TestMGetFail(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestAppend(t *testing.T) {
@@ -310,8 +274,6 @@ func TestAppend(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestBitCount(t *testing.T) {
@@ -325,8 +287,6 @@ func TestBitCount(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestBitOp(t *testing.T) {
@@ -340,8 +300,6 @@ func TestBitOp(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestBitOpFail(t *testing.T) {
@@ -358,8 +316,6 @@ func TestBitOpFail(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestBitPos(t *testing.T) {
@@ -383,8 +339,6 @@ func TestBitPos(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestGetBit(t *testing.T) {
@@ -398,8 +352,6 @@ func TestGetBit(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestGetRange(t *testing.T) {
@@ -413,8 +365,6 @@ func TestGetRange(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestPSetEx(t *testing.T) {
@@ -438,8 +388,6 @@ func TestPSetEx(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetEx(t *testing.T) {
@@ -463,8 +411,6 @@ func TestSetEx(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetBit(t *testing.T) {
@@ -476,8 +422,6 @@ func TestSetBit(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetRange(t *testing.T) {
@@ -491,8 +435,6 @@ func TestSetRange(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestStrLen(t *testing.T) {
@@ -506,27 +448,106 @@ func TestStrLen(t *testing.T) {
 	}
 
 	safeTestContext(test)
+}
 
-	print(".")
+func TestStringsPipelinedFailed(t *testing.T) {
+
+	safeTestContext(func() {
+
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			k := gr.KeyExpiration{2, 3}
+			q := gr.MustExist
+			p.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
+
+			p.BitOp(10, "gr::one", "gr::two")
+		})
+
+		for _, e := range err {
+			if e != gr.ParamErr {
+				t.Fail()
+			}
+		}
+
+		err = redis.Pipelined(func(p *gr.Pipeline) {
+			p.BitOp(gr.AND, "gr::one")
+			p.MGet()
+			p.MSet()
+			p.MSetNx()
+		})
+
+		for _, e := range err {
+			if e != gr.NotEnoughParamsErr {
+				t.Fail()
+			}
+		}
+
+	})
+}
+
+func TestStringsPipelinedTimeout(t *testing.T) {
+
+	safeTestContext(func() {
+
+		var ninja *gr.RespString
+
+		//PSetEx
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			p.PSetEx("gr::volatile::ms", 100, "ninja")
+			ninja = p.Get("gr::volatile::ms")
+		})
+
+		if err != nil {
+			t.Fail()
+		}
+
+		if ninja.Error != nil || ninja.Value != "ninja" {
+			t.Fail()
+		}
+
+		time.Sleep(200 * time.Millisecond)
+
+		_, e := redis.Get("gr::volatile::ms")
+		if e != gr.NilErr {
+			t.Fail()
+		}
+
+		//SetEx
+		err = redis.Pipelined(func(p *gr.Pipeline) {
+			p.SetEx("gr::volatile", 1, "ninja")
+			ninja = p.Get("gr::volatile")
+		})
+
+		if err != nil {
+			t.Fail()
+		}
+
+		if ninja.Error != nil || ninja.Value != "ninja" {
+			t.Fail()
+		}
+
+		time.Sleep(1100 * time.Millisecond)
+
+		_, e = redis.Get("gr::volatile")
+		if e != gr.NilErr {
+			t.Fail()
+		}
+
+	})
 }
 
 func TestStringsPipelined(t *testing.T) {
 
 	safeTestContext(func() {
 
-		//	k := gr.KeyExpiration{2, 3}
-		//	q := gr.MustExist
-		//		s5 = p.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
-
 		var s [8]*gr.RespString
-		var i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15 *gr.RespInt
+		var i [14]*gr.RespInt
 		var f *gr.RespFloat
-		var b1, b2 *gr.RespBool
-		var sa1 *gr.RespStringArray
+		var b [2]*gr.RespBool
+		var sa *gr.RespStringArray
 
 		err := redis.Pipelined(func(p *gr.Pipeline) {
 			s[0] = p.Set("gr::father", "Darth Vader")
-			b1 = p.SetNx("gr::it doesn't exist", "??")
+			b[0] = p.SetNx("gr::it doesn't exist", "??")
 
 			s[1] = p.Get("gr::father")
 			s[2] = p.GetSet("gr::father", "Anakin")
@@ -538,30 +559,30 @@ func TestStringsPipelined(t *testing.T) {
 			s[4] = p.Get("gr::i am sure this is not a key")
 
 			s[5] = p.Set("gr::number", "1")
-			i2 = p.Incr("gr::number")
-			i3 = p.IncrBy("gr::number", 2)
+			i[0] = p.Incr("gr::number")
+			i[1] = p.IncrBy("gr::number", 2)
 			f = p.IncrByFloat("gr::number:float", 0.5)
-			i4 = p.Decr("gr::number")
-			i5 = p.DecrBy("gr::number", 2)
+			i[2] = p.Decr("gr::number")
+			i[3] = p.DecrBy("gr::number", 2)
 
 			s[6] = p.MSet("gr::one", "1", "gr::two", "2", "gr::three", "3")
 
-			b2 = p.MSetNx("gr::four", "4")
-			sa1 = p.MGet("gr::one", "gr::two", "gr::three")
-			i6 = p.Append("gr::two", "-dos")
-			i7 = p.BitCount("gr::one")
-			i8 = p.BitOp(gr.AND, "gr::one", "gr::two")
-			i9 = p.BitPos("gr::one", true)
-			i10 = p.BitPos("gr::one", true, 0)
-			i11 = p.BitPos("gr::one", true, 0, -1)
-			i12 = p.GetBit("gr::one", 2)
-			i13 = p.SetBit("gr::one", 1, true)
-			s[7] = p.GetRange("gr::father", 0, 2)
-			i14 = p.SetRange("gr::one", 0, "2")
-			i15 = p.StrLen("gr::one")
+			b[1] = p.MSetNx("gr::four", "4")
+			sa = p.MGet("gr::one", "gr::two", "gr::three")
+			i[4] = p.Append("gr::two", "-dos")
+			i[5] = p.BitCount("gr::one")
+			i[6] = p.BitOp(gr.AND, "gr::one", "gr::two")
+			i[7] = p.BitPos("gr::one", true)
+			i[8] = p.BitPos("gr::one", true, 0)
+			i[9] = p.BitPos("gr::one", true, 0, -1)
+			i[10] = p.GetBit("gr::one", 2)
+			i[11] = p.SetBit("gr::one", 1, true)
 
-			p.PSetEx("gr::volatile::ms", 100, "ninja")
-			p.SetEx("gr::volatile::s", 1, "ninja")
+			p.Set("gr::father", "Darth Vader")
+			s[7] = p.GetRange("gr::father", 0, 2)
+
+			i[12] = p.SetRange("gr::one", 0, "2")
+			i[13] = p.StrLen("gr::one")
 
 		})
 
@@ -573,7 +594,7 @@ func TestStringsPipelined(t *testing.T) {
 			t.Fail()
 		}
 
-		if b1.Error != nil || !b1.Value {
+		if b[0].Error != nil || !b[0].Value {
 			t.Fail()
 		}
 
@@ -597,11 +618,11 @@ func TestStringsPipelined(t *testing.T) {
 			t.Fail()
 		}
 
-		if i2.Error != nil || i2.Value != 2 {
+		if i[0].Error != nil || i[0].Value != 2 {
 			t.Fail()
 		}
 
-		if i3.Error != nil || i3.Value != 4 {
+		if i[1].Error != nil || i[1].Value != 4 {
 			t.Fail()
 		}
 
@@ -609,17 +630,63 @@ func TestStringsPipelined(t *testing.T) {
 			t.Fail()
 		}
 
-		if i4.Error != nil || i4.Value != 3 {
+		if i[2].Error != nil || i[2].Value != 3 {
 			t.Fail()
 		}
 
-		if i5.Error != nil || i5.Value != 1 {
+		if i[3].Error != nil || i[3].Value != 1 {
+			t.Fail()
+		}
+
+		if s[6].Error != nil || s[6].Value != "OK" {
+			t.Fail()
+		}
+
+		if b[1].Error != nil || !b[1].Value {
+			t.Fail()
+		}
+
+		if sa.Error != nil || !reflect.DeepEqual([]string{"1", "2", "3"}, sa.Value) {
+			t.Fail()
+		}
+
+		if i[4].Error != nil || i[4].Value != 5 {
+			t.Fail()
+		}
+
+		if i[5].Error != nil || i[5].Value != 3 {
+			t.Fail()
+		}
+
+		if i[6].Error != nil {
+			t.Fail()
+		}
+
+		if i[7].Error != nil || i[8].Error != nil || i[9].Error != nil {
+			t.Fail()
+		}
+
+		if i[10].Error != nil || i[10].Value != 1 {
+			t.Fail()
+		}
+
+		if i[11].Error != nil || i[11].Value != 0 {
+			t.Fail()
+		}
+
+		if s[7].Error != nil || s[7].Value != "Dar" {
+			t.Fail()
+		}
+
+		if i[12].Error != nil || i[12].Value != 5 {
+			t.Fail()
+		}
+
+		if i[13].Error != nil || i[13].Value != 5 {
 			t.Fail()
 		}
 
 	})
-
-	print(".")
 }
 
 func TestStringsEnd(t *testing.T) {

@@ -64,4 +64,5 @@ func safeTestContext(fn testCase) {
 	if err := removeKeys(); err != nil {
 		panic(err)
 	}
+	print(".")
 }
