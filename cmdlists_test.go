@@ -19,7 +19,6 @@ func TestLPushWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-	print(".")
 }
 
 func TestLPush(t *testing.T) {
@@ -31,8 +30,6 @@ func TestLPush(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLPushX(t *testing.T) {
@@ -46,8 +43,6 @@ func TestLPushX(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestRPushWrongParams(t *testing.T) {
@@ -71,8 +66,6 @@ func TestRPush(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestRPushX(t *testing.T) {
@@ -86,8 +79,6 @@ func TestRPushX(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLLen(t *testing.T) {
@@ -101,8 +92,6 @@ func TestLLen(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLIndex(t *testing.T) {
@@ -116,8 +105,6 @@ func TestLIndex(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLPop(t *testing.T) {
@@ -131,8 +118,6 @@ func TestLPop(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestRPop(t *testing.T) {
@@ -146,8 +131,6 @@ func TestRPop(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLSet(t *testing.T) {
@@ -161,8 +144,6 @@ func TestLSet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLInsertWrongParams(t *testing.T) {
@@ -191,8 +172,6 @@ func TestLInsert(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestRPopLPush(t *testing.T) {
@@ -206,8 +185,6 @@ func TestRPopLPush(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestBRPopLPush(t *testing.T) {
@@ -221,8 +198,6 @@ func TestBRPopLPush(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestBLPopWrongParams(t *testing.T) {
@@ -246,8 +221,6 @@ func TestBLPop(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestBRPopWrongParams(t *testing.T) {
@@ -271,8 +244,6 @@ func TestBRPop(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLRange(t *testing.T) {
@@ -286,8 +257,6 @@ func TestLRange(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLRem(t *testing.T) {
@@ -301,8 +270,6 @@ func TestLRem(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestLTrim(t *testing.T) {
@@ -316,8 +283,38 @@ func TestLTrim(t *testing.T) {
 	}
 
 	safeTestContext(test)
+}
 
-	print(".")
+func TestListsPipelinedFailed(t *testing.T) {
+
+	safeTestContext(func() {
+
+		//NotEnoughParamsErr
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			p.LPush("gr::mylist")
+			p.RPush("gr::mylist")
+			p.BLPop(0)
+			p.BRPop(0)
+		})
+
+		for _, e := range err {
+			if e != gr.NotEnoughParamsErr {
+				t.Fail()
+			}
+		}
+
+		//ParamErr
+		err = redis.Pipelined(func(p *gr.Pipeline) {
+			p.LInsert("gr::mylist", 3, "foo", "foo")
+		})
+
+		for _, e := range err {
+			if e != gr.ParamErr {
+				t.Fail()
+			}
+		}
+
+	})
 }
 
 func TestListsPipelined(t *testing.T) {
@@ -325,10 +322,8 @@ func TestListsPipelined(t *testing.T) {
 	safeTestContext(func() {
 
 		err := redis.Pipelined(func(p *gr.Pipeline) {
-			//p.LPush("gr::mylist")
 			p.LPush("gr::mylist", "3", "2")
 			p.LPushX("gr::mylist", "1")
-			//p.RPush("gr::mylist")
 			p.RPush("gr::mylist", "4", "5")
 			p.RPushX("gr::mylist", "6")
 			p.LLen("gr::mylist")
@@ -336,14 +331,10 @@ func TestListsPipelined(t *testing.T) {
 			p.LPop("gr::mylist")
 			p.RPop("gr::mylist")
 			p.LSet("gr::mylist", 0, "10")
-			//p.LInsert("gr::mylist", 3, "foo", "foo")
 			p.LInsert("gr::mylist", gr.Before, "10", "11")
-			//p.LInsert("gr::mylist", gr.After, "11", "12")
 			p.RPopLPush("gr::mylist", "my_other_list")
 			p.BRPopLPush("gr::mylist", "my_other_list", 0)
-			//p.BLPop(0)
 			p.BLPop(0, "gr::mylist")
-			//p.BRPop(0)
 			p.BRPop(0, "gr::mylist")
 			p.LRange("gr::mylist", 0, -1)
 			p.LRem("gr::mylist", 0, "10")
@@ -356,7 +347,6 @@ func TestListsPipelined(t *testing.T) {
 
 	})
 
-	print(".")
 }
 
 func TestListsEnd(t *testing.T) {
