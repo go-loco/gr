@@ -39,7 +39,7 @@ func multiCompile(values ...string) [][]byte {
 	return r
 }
 
-func debugCmds(cmds [][]byte) {
+/*func debugCmds(cmds [][]byte) {
 
 	println("")
 	println("********")
@@ -51,4 +51,4 @@ func debugCmds(cmds [][]byte) {
 	}
 
 	println("********")
-}
+}*/

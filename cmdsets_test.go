@@ -251,16 +251,13 @@ func TestSScan(t *testing.T) {
 		if len(r) == 0 || err != nil {
 			t.Fail()
 		}
-		/*
-			sp := new(gr.ScanParams).Count(3).Match("a")
 
-			_, rr, err := redis.SScan("gr::myset::sscan", 0, sp)
-			if err != nil || len(rr) <= 0 {
-				t.Fail()
+		sp := new(gr.ScanParams).Count(3).Match("a")
 
-				print(len(rr))
-
-			}*/
+		_, rr, err := redis.SScan("gr::myset::sscan", 0, sp)
+		if err != nil || len(rr) <= 0 {
+			t.Fail()
+		}
 	}
 
 	safeTestContext(test)

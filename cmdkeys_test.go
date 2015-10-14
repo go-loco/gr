@@ -25,8 +25,6 @@ func TestDump(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestExists(t *testing.T) {
@@ -39,8 +37,6 @@ func TestExists(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestExpire(t *testing.T) {
@@ -60,8 +56,6 @@ func TestExpire(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestExpireAt(t *testing.T) {
@@ -82,8 +76,6 @@ func TestExpireAt(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestPExpire(t *testing.T) {
@@ -103,8 +95,6 @@ func TestPExpire(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestPExpireAt(t *testing.T) {
@@ -125,8 +115,6 @@ func TestPExpireAt(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestPersist(t *testing.T) {
@@ -150,8 +138,6 @@ func TestPersist(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestKeys(t *testing.T) {
@@ -166,8 +152,6 @@ func TestKeys(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestRandomKey(t *testing.T) {
@@ -182,8 +166,6 @@ func TestRandomKey(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestTTL(t *testing.T) {
@@ -197,8 +179,6 @@ func TestTTL(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestPTTL(t *testing.T) {
@@ -212,8 +192,6 @@ func TestPTTL(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestRenameNx(t *testing.T) {
@@ -227,8 +205,6 @@ func TestRenameNx(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestRename(t *testing.T) {
@@ -242,8 +218,6 @@ func TestRename(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestType(t *testing.T) {
@@ -257,8 +231,6 @@ func TestType(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestDelWrongParams(t *testing.T) {
@@ -293,8 +265,6 @@ func TestScan(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSort(t *testing.T) {
@@ -331,8 +301,6 @@ func TestSort(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSortStore(t *testing.T) {
@@ -347,8 +315,6 @@ func TestSortStore(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestObjectEncoding(t *testing.T) {
@@ -365,8 +331,6 @@ func TestObjectEncoding(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestObjectRefCount(t *testing.T) {
@@ -380,8 +344,6 @@ func TestObjectRefCount(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestObjectIdleTime(t *testing.T) {
@@ -439,8 +401,6 @@ func TestMove(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestWait(t *testing.T) {
@@ -452,8 +412,6 @@ func TestWait(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestMigrate(t *testing.T) {
@@ -569,7 +527,6 @@ func TestKeysPipelined(t *testing.T) {
 
 	})
 
-	print(".")
 }
 
 func TestKeysEnd(t *testing.T) {
