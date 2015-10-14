@@ -20,8 +20,6 @@ func TestSAddWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSAdd(t *testing.T) {
@@ -33,8 +31,6 @@ func TestSAdd(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSCard(t *testing.T) {
@@ -47,8 +43,6 @@ func TestSCard(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSDiffWrongParams(t *testing.T) {
@@ -59,7 +53,6 @@ func TestSDiffWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-	print(".")
 }
 
 func TestSDiff(t *testing.T) {
@@ -78,8 +71,6 @@ func TestSDiff(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSDiffStoreWrongParams(t *testing.T) {
@@ -90,8 +81,6 @@ func TestSDiffStoreWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSDiffStore(t *testing.T) {
@@ -106,8 +95,6 @@ func TestSDiffStore(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSInterWrongParams(t *testing.T) {
@@ -118,8 +105,6 @@ func TestSInterWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSInter(t *testing.T) {
@@ -138,8 +123,6 @@ func TestSInter(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSInterStoreWrongParams(t *testing.T) {
@@ -150,8 +133,6 @@ func TestSInterStoreWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSInterStore(t *testing.T) {
@@ -166,8 +147,6 @@ func TestSInterStore(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSIsMember(t *testing.T) {
@@ -181,8 +160,6 @@ func TestSIsMember(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSMembers(t *testing.T) {
@@ -196,8 +173,6 @@ func TestSMembers(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSMove(t *testing.T) {
@@ -212,8 +187,6 @@ func TestSMove(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSPop(t *testing.T) {
@@ -227,8 +200,6 @@ func TestSPop(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSRandMember(t *testing.T) {
@@ -247,8 +218,6 @@ func TestSRandMember(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSRemWrongParams(t *testing.T) {
@@ -259,8 +228,6 @@ func TestSRemWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSRem(t *testing.T) {
@@ -274,8 +241,6 @@ func TestSRem(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSScan(t *testing.T) {
@@ -299,8 +264,6 @@ func TestSScan(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSUnionWrongParams(t *testing.T) {
@@ -311,8 +274,6 @@ func TestSUnionWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSUnion(t *testing.T) {
@@ -327,8 +288,6 @@ func TestSUnion(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSUnionStoreWrongParams(t *testing.T) {
@@ -339,8 +298,6 @@ func TestSUnionStoreWrongParams(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSUnionStore(t *testing.T) {
@@ -355,8 +312,29 @@ func TestSUnionStore(t *testing.T) {
 	}
 
 	safeTestContext(test)
+}
 
-	print(".")
+func TestSetsPipelinedFailed(t *testing.T) {
+
+	safeTestContext(func() {
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			p.SAdd("gr::myset")
+			p.SDiff("gr::myset")
+			p.SDiffStore("gr::myresultset", "gr::myset")
+			p.SInter("gr::myset")
+			p.SInterStore("gr::myresultset", "gr::myset")
+			p.SRem("gr::myset")
+			p.SUnion("gr::myset")
+			p.SUnionStore("gr::myresultset", "gr::myset")
+		})
+
+		for _, e := range err {
+			if e != gr.NotEnoughParamsErr {
+				t.Fail()
+			}
+		}
+
+	})
 }
 
 func TestSetsPipelined(t *testing.T) {
@@ -489,8 +467,6 @@ func TestSetsPipelined(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestSetsEnd(t *testing.T) {
