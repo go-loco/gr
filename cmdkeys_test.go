@@ -520,6 +520,7 @@ func TestKeysPipelined(t *testing.T) {
 			p.Set("gr::object", "object")
 			p.Set("gr::move_me", "foo")
 
+			p.Set("gr::father", "Vader")
 			dump = p.Dump("gr::father")
 		})
 
@@ -536,7 +537,6 @@ func TestKeysPipelined(t *testing.T) {
 
 		err = redis.Pipelined(func(p *gr.Pipeline) {
 
-			p.Set("gr::father", "Vader")
 			b[0] = p.Exists("gr::father")
 
 			s[0] = p.Get("gr::expire")
@@ -591,6 +591,8 @@ func TestKeysPipelined(t *testing.T) {
 
 			p.Migrate("localhost", 7000, "gr::father", "0", 500, true, true)
 			p.Migrate("localhost", 7000, "gr::father", "0", 500, false, true)
+
+			p.Wait(1, 500)
 		})
 
 		if err != nil {
@@ -679,12 +681,11 @@ func TestKeysPipelined(t *testing.T) {
 
 		if s[8].Error != nil || s[8].Value != "OK" {
 			t.Fail()
-			println(s[8].Value)
 		}
 
-		/*if s[9].Error != nil || s[9].Value != "OK" {
+		if s[9].Error != nil || s[9].Value != "OK" {
 			t.Fail()
-		}*/
+		}
 
 		r2, err2 := gr.NewWithConfig(gr.Config{
 			Port:           7000,
