@@ -27,8 +27,6 @@ func TestHSet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHGet(t *testing.T) {
@@ -42,8 +40,6 @@ func TestHGet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHGetAll(t *testing.T) {
@@ -60,8 +56,6 @@ func TestHGetAll(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHIncrBy(t *testing.T) {
@@ -75,8 +69,6 @@ func TestHIncrBy(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHIncrByFloat(t *testing.T) {
@@ -90,8 +82,6 @@ func TestHIncrByFloat(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHExists(t *testing.T) {
@@ -104,8 +94,6 @@ func TestHExists(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHKeys(t *testing.T) {
@@ -137,8 +125,6 @@ func TestHKeys(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHLen(t *testing.T) {
@@ -153,8 +139,6 @@ func TestHLen(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHMGetWrongParams(t *testing.T) {
@@ -183,8 +167,6 @@ func TestHMGet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHMSetWrongParams(t *testing.T) {
@@ -210,8 +192,6 @@ func TestHMSet(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHSetNx(t *testing.T) {
@@ -223,8 +203,6 @@ func TestHSetNx(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 //func TestHStrLen(t *testing.T) {
@@ -249,8 +227,6 @@ func TestHVals(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHScan(t *testing.T) {
@@ -275,8 +251,6 @@ func TestHScan(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHDelWrongParams(t *testing.T) {
@@ -309,8 +283,6 @@ func TestHDel(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestHashesPipelined(t *testing.T) {
@@ -355,7 +327,6 @@ func TestHashesPipelined(t *testing.T) {
 			t.Fail()
 		}
 
-		print(".")
 	})
 }
 

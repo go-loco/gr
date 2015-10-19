@@ -22,8 +22,6 @@ func TestPubSub(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func TestPubSubPattern(t *testing.T) {
@@ -35,8 +33,6 @@ func TestPubSubPattern(t *testing.T) {
 	}
 
 	safeTestContext(test)
-
-	print(".")
 }
 
 func pub(goThread string) {

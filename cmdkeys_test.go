@@ -298,20 +298,44 @@ func TestSort(t *testing.T) {
 		if err != nil || !reflect.DeepEqual(r, []string{"3", "2", "1"}) {
 			t.Fail()
 		}
+
+		sortParams = new(gr.SortParams).Get("#")
+		r, err = redis.Sort("gr::mylist", sortParams)
+		if err != nil || !reflect.DeepEqual(r, []string{"1", "2", "3"}) {
+			t.Fail()
+		}
+
 	}
 
 	safeTestContext(test)
 }
 
 func TestSortStore(t *testing.T) {
+
 	test := func() {
 		redis.RPush("gr::mylist", "3", "2", "1")
 
-		sortParams := new(gr.SortParams).By("gr::mylist").Alpha().Asc()
-		r, err := redis.SortStore("gr::mylist", "gr::resultkey", sortParams)
+		r, err := redis.SortStore("gr::mylist", "gr::resultkey", nil)
 		if err != nil || r != 3 {
 			t.Fail()
 		}
+
+		rr, err := redis.LRange("gr::resultkey", 0, -1)
+		if err != nil || rr[0] != "1" {
+			t.Fail()
+		}
+
+		sortParams := new(gr.SortParams).By("gr::mylist").Alpha().Asc()
+		r, err = redis.SortStore("gr::mylist", "gr::resultkey", sortParams)
+		if err != nil || r != 3 {
+			t.Fail()
+		}
+
+		rr, err = redis.LRange("gr::resultkey", 0, -1)
+		if err != nil || rr[0] != "3" {
+			t.Fail()
+		}
+
 	}
 
 	safeTestContext(test)
@@ -415,18 +439,51 @@ func TestWait(t *testing.T) {
 }
 
 func TestMigrate(t *testing.T) {
+
 	test := func() {
+
+		r2, err2 := gr.NewWithConfig(gr.Config{
+			Port:           7000,
+			Address:        "localhost",
+			MinConnections: 1,
+		})
+
+		if err2 != nil {
+			t.Fail()
+		}
+
+		r2.Del("gr::father")
 		redis.Set("gr::father", "Darth")
 
-		r, err := redis.Migrate("localhost", 7000, "gr::father", "0", 500, true, true)
+		r, err := redis.Migrate("localhost", 7000, "gr::father", "0", 500, true, false)
 		if err != nil || r != "OK" {
 			t.Fail()
 		}
+
+		r, err = redis.Migrate("localhost", 7000, "gr::father", "0", 500, true, true)
+		if err != nil || r != "OK" {
+			t.Fail()
+		}
+
+		r2.Del("gr::father")
+
+		r, err = redis.Migrate("localhost", 7000, "gr::father", "0", 500, false, false)
+		if err != nil || r != "OK" {
+			t.Fail()
+		}
+
+		redis.Set("gr::father", "Darth")
 
 		r, err = redis.Migrate("localhost", 7000, "gr::father", "0", 500, false, true)
 		if err != nil || r != "OK" {
 			t.Fail()
 		}
+
+		d, err := r2.Del("gr::father")
+		if err != nil || d != 1 {
+			t.Fail()
+		}
+
 	}
 
 	safeTestContext(test)
@@ -435,6 +492,8 @@ func TestMigrate(t *testing.T) {
 func TestKeysPipelined(t *testing.T) {
 
 	safeTestContext(func() {
+
+		var dump *gr.RespString
 
 		//setup
 		err := redis.Pipelined(func(p *gr.Pipeline) {
@@ -445,10 +504,15 @@ func TestKeysPipelined(t *testing.T) {
 			td := time.Now().Add(time.Second)
 			p.ExpireAt("gr::expire_at", td)
 
+			p.Set("gr::p_expire_at", "bla")
+			td = time.Now().Add(100 * time.Millisecond)
+			p.PExpireAt("gr::p_expire_at", td)
+
 			p.Set("gr::not_expire", "bla")
 			p.PExpire("gr::not_expire", 500)
 			p.Persist("gr::not_expire")
 
+			p.Set("gr::change_me_nx", "foo")
 			p.Set("gr::change_me", "foo")
 
 			p.RPush("gr::mylist", "3", "2", "1")
@@ -456,6 +520,7 @@ func TestKeysPipelined(t *testing.T) {
 			p.Set("gr::object", "object")
 			p.Set("gr::move_me", "foo")
 
+			dump = p.Dump("gr::father")
 		})
 
 		if err != nil {
@@ -464,53 +529,60 @@ func TestKeysPipelined(t *testing.T) {
 
 		time.Sleep(1200 * time.Millisecond)
 
+		var s [10]*gr.RespString
+		var b [2]*gr.RespBool
+		var i [5]*gr.RespInt
+		var sa [7]*gr.RespStringArray
+
 		err = redis.Pipelined(func(p *gr.Pipeline) {
+
 			p.Set("gr::father", "Vader")
-			p.Dump("gr::father")
-			p.Exists("gr::father")
+			b[0] = p.Exists("gr::father")
 
-			p.Get("gr::expire")
+			s[0] = p.Get("gr::expire")
+			s[1] = p.Get("gr::expire_at")
+			s[2] = p.Get("gr::p_expire_at")
+			s[3] = p.Get("gr::not_expire")
 
-			p.Get("gr::expire_at")
+			sa[0] = p.Keys("gr::*")
 
-			p.Get("gr::not_expire")
+			s[4] = p.RandomKey()
 
-			p.Keys("gr::*")
+			i[0] = p.TTL("gr::father")
+			i[1] = p.PTTL("gr::father")
 
-			p.RandomKey()
+			b[1] = p.RenameNx("gr::change_me_nx", "gr::changed")
+			s[5] = p.Rename("gr::change_me", "gr::changed")
 
-			p.TTL("gr::father")
-			p.PTTL("gr::father")
+			s[6] = p.Type("gr::father")
 
-			p.RenameNx("gr::change_me", "gr::changed")
+			///p.Del()
 
-			p.Type("gr::father")
+			sa[1] = p.Sort("gr::mylist", nil)
 
-			//p.Del()
-
-			p.Sort("gr::mylist", nil)
-
-			p.Sort("gr::mylist", new(gr.SortParams).NoSort())
+			sa[2] = p.Sort("gr::mylist", new(gr.SortParams).NoSort())
 
 			sortParams := new(gr.SortParams).Desc()
-			p.Sort("gr::mylist", sortParams)
+			sa[3] = p.Sort("gr::mylist", sortParams)
 
 			sortParams = new(gr.SortParams).Limit(0, 1)
-			p.Sort("gr::mylist", sortParams)
+			sa[4] = p.Sort("gr::mylist", sortParams)
 
 			sortParams = new(gr.SortParams).By("gr::mylist").Alpha().Asc()
-			p.Sort("gr::mylist", sortParams)
+			sa[5] = p.Sort("gr::mylist", sortParams)
+
+			sortParams = new(gr.SortParams).Get("#")
+			sa[6] = p.Sort("gr::mylist", sortParams)
 
 			sortParams = new(gr.SortParams).By("gr::mylist").Alpha().Asc()
-			p.SortStore("gr::mylist", "gr::resultkey", sortParams)
+			i[2] = p.SortStore("gr::mylist", "gr::resultkey", sortParams)
 
-			p.ObjectEncoding("gr::object")
-			p.ObjectRefCount("gr::object")
-			p.ObjectIdleTime("gr::object")
+			s[7] = p.ObjectEncoding("gr::object")
+			i[3] = p.ObjectRefCount("gr::object")
+			i[4] = p.ObjectIdleTime("gr::object")
 
-			//p.Dump("gr::father")
-			//p.Restore("gr::father", 0, dump, true)
-			//p.Restore("gr::father2", 0, dump, false)
+			s[8] = p.Restore("gr::father", 0, dump.Value, true)
+			s[9] = p.Restore("gr::father2", 0, dump.Value, false)
 
 			p.Move("gr::move_me", "1")
 			p.Select(1)
@@ -524,6 +596,107 @@ func TestKeysPipelined(t *testing.T) {
 		if err != nil {
 			t.Fail()
 		}
+
+		if b[0].Error != nil || !b[0].Value {
+			t.Fail()
+		}
+
+		if s[0].Error != gr.NilErr {
+			t.Fail()
+		}
+
+		if s[1].Error != gr.NilErr {
+			t.Fail()
+		}
+
+		if s[2].Error != gr.NilErr {
+			t.Fail()
+		}
+
+		if s[3].Error != nil || s[3].Value != "bla" {
+			t.Fail()
+		}
+
+		if s[4].Error != nil || s[4].Value == "" {
+			t.Fail()
+		}
+
+		if i[0].Error != nil || i[0].Value != -1 {
+			t.Fail()
+		}
+
+		if i[1].Error != nil || i[1].Value != -1 {
+			t.Fail()
+		}
+
+		if b[1].Error != nil || !b[1].Value {
+			t.Fail()
+		}
+
+		if s[5].Error != nil || s[5].Value != "OK" {
+			t.Fail()
+		}
+
+		if s[6].Error != nil || s[6].Value != "string" {
+			t.Fail()
+		}
+
+		if sa[1].Error != nil || !reflect.DeepEqual(sa[1].Value, []string{"1", "2", "3"}) {
+			t.Fail()
+		}
+
+		if sa[2].Error != nil || !reflect.DeepEqual(sa[2].Value, []string{"3", "2", "1"}) {
+			t.Fail()
+		}
+
+		if sa[3].Error != nil || !reflect.DeepEqual(sa[3].Value, []string{"3", "2", "1"}) {
+			t.Fail()
+		}
+
+		if sa[4].Error != nil || len(sa[4].Value) != 1 {
+			t.Fail()
+		}
+
+		if sa[5].Error != nil || !reflect.DeepEqual(sa[5].Value, []string{"3", "2", "1"}) {
+			t.Fail()
+		}
+
+		if sa[6].Error != nil || !reflect.DeepEqual(sa[6].Value, []string{"1", "2", "3"}) {
+			t.Fail()
+		}
+
+		if s[7].Error != nil || s[7].Value != "embstr" {
+			t.Fail()
+		}
+
+		if i[3].Error != nil || i[3].Value != 1 {
+			t.Fail()
+		}
+
+		if i[4].Error != nil || i[4].Value < 1 {
+			t.Fail()
+		}
+
+		if s[8].Error != nil || s[8].Value != "OK" {
+			t.Fail()
+			println(s[8].Value)
+		}
+
+		/*if s[9].Error != nil || s[9].Value != "OK" {
+			t.Fail()
+		}*/
+
+		r2, err2 := gr.NewWithConfig(gr.Config{
+			Port:           7000,
+			Address:        "localhost",
+			MinConnections: 1,
+		})
+
+		if err2 != nil {
+			t.Fail()
+		}
+
+		r2.Del("gr::father")
 
 	})
 
