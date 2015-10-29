@@ -489,6 +489,21 @@ func TestMigrate(t *testing.T) {
 	safeTestContext(test)
 }
 
+func TestKeysPipelinedFail(t *testing.T) {
+
+	safeTestContext(func() {
+
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			p.Del()
+		})
+
+		if err == nil {
+			t.Fail()
+		}
+
+	})
+}
+
 func TestKeysPipelined(t *testing.T) {
 
 	safeTestContext(func() {
@@ -530,9 +545,9 @@ func TestKeysPipelined(t *testing.T) {
 
 		time.Sleep(1200 * time.Millisecond)
 
-		var s [10]*gr.RespString
-		var b [2]*gr.RespBool
-		var i [5]*gr.RespInt
+		var s [12]*gr.RespString
+		var b [3]*gr.RespBool
+		var i [6]*gr.RespInt
 		var sa [7]*gr.RespStringArray
 
 		err = redis.Pipelined(func(p *gr.Pipeline) {
@@ -555,8 +570,6 @@ func TestKeysPipelined(t *testing.T) {
 			s[5] = p.Rename("gr::change_me", "gr::changed")
 
 			s[6] = p.Type("gr::father")
-
-			///p.Del()
 
 			sa[1] = p.Sort("gr::mylist", nil)
 
@@ -584,13 +597,13 @@ func TestKeysPipelined(t *testing.T) {
 			s[8] = p.Restore("gr::father", 0, dump.Value, true)
 			s[9] = p.Restore("gr::father2", 0, dump.Value, false)
 
-			p.Move("gr::move_me", "1")
+			b[2] = p.Move("gr::move_me", "1")
 			p.Select(1)
-			p.Del("gr::move_me")
+			i[5] = p.Del("gr::move_me")
 			p.Select(0)
 
-			p.Migrate("localhost", 7000, "gr::father", "0", 500, true, true)
-			p.Migrate("localhost", 7000, "gr::father", "0", 500, false, true)
+			s[10] = p.Migrate("localhost", 7000, "gr::father", "0", 500, true, true)
+			s[11] = p.Migrate("localhost", 7000, "gr::father", "0", 500, false, true)
 
 			p.Wait(1, 500)
 		})
@@ -684,6 +697,18 @@ func TestKeysPipelined(t *testing.T) {
 		}
 
 		if s[9].Error != nil || s[9].Value != "OK" {
+			t.Fail()
+		}
+
+		if b[2].Error != nil || !b[2].Value {
+			t.Fail()
+		}
+
+		if s[10].Error != nil || s[10].Value != "OK" {
+			t.Fail()
+		}
+
+		if s[11].Error != nil || s[11].Value != "OK" {
 			t.Fail()
 		}
 
