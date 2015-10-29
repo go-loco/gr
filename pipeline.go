@@ -352,8 +352,8 @@ func (p *Pipeline) LInsert(key string, location InsertLocation, pivot string, va
 	return p.enqueueInt(rs)
 }
 
-func (p *Pipeline) LRange(key string, start int, stop int) *RespString {
-	return p.enqueueStr(rLRange(key, start, stop))
+func (p *Pipeline) LRange(key string, start int, stop int) *RespStringArray {
+	return p.enqueueStrArray(rLRange(key, start, stop))
 }
 
 func (p *Pipeline) LRem(key string, count int, value string) *RespInt {

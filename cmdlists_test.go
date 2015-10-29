@@ -321,27 +321,95 @@ func TestListsPipelined(t *testing.T) {
 
 	safeTestContext(func() {
 
+		var lPush, lPushX, rPush, rPushX, lLen, lInsert, lRem *gr.RespInt
+		var lIndex, lPop, rPop, lSet, rPoplPush, brPoplPush, lTrim *gr.RespString
+		var blPop, brPop, lRange *gr.RespStringArray
+
 		err := redis.Pipelined(func(p *gr.Pipeline) {
-			p.LPush("gr::mylist", "3", "2")
-			p.LPushX("gr::mylist", "1")
-			p.RPush("gr::mylist", "4", "5")
-			p.RPushX("gr::mylist", "6")
-			p.LLen("gr::mylist")
-			p.LIndex("gr::mylist", 2)
-			p.LPop("gr::mylist")
-			p.RPop("gr::mylist")
-			p.LSet("gr::mylist", 0, "10")
-			p.LInsert("gr::mylist", gr.Before, "10", "11")
-			p.RPopLPush("gr::mylist", "my_other_list")
-			p.BRPopLPush("gr::mylist", "my_other_list", 0)
-			p.BLPop(0, "gr::mylist")
-			p.BRPop(0, "gr::mylist")
-			p.LRange("gr::mylist", 0, -1)
-			p.LRem("gr::mylist", 0, "10")
-			p.LTrim("gr::mylist", 0, 2)
+			lPush = p.LPush("gr::mylist", "3", "2")
+			lPushX = p.LPushX("gr::mylist", "1")
+			rPush = p.RPush("gr::mylist", "4", "5")
+			rPushX = p.RPushX("gr::mylist", "6")
+			lLen = p.LLen("gr::mylist")
+			lIndex = p.LIndex("gr::mylist", 2)
+			lPop = p.LPop("gr::mylist")
+			rPop = p.RPop("gr::mylist")
+			lSet = p.LSet("gr::mylist", 0, "10")
+			lInsert = p.LInsert("gr::mylist", gr.Before, "10", "11")
+			rPoplPush = p.RPopLPush("gr::mylist", "my_other_list")
+			brPoplPush = p.BRPopLPush("gr::mylist", "my_other_list", 0)
+			blPop = p.BLPop(0, "gr::mylist")
+			brPop = p.BRPop(0, "gr::mylist")
+			lRange = p.LRange("gr::mylist", 0, -1)
+			lRem = p.LRem("gr::mylist", 0, "10")
+			lTrim = p.LTrim("gr::mylist", 0, 2)
 		})
 
 		if err != nil {
+			t.Fail()
+		}
+
+		if lPush.Error != nil || lPush.Value != 2 {
+			t.Fail()
+		}
+
+		if lPushX.Error != nil || lPushX.Value != 3 {
+			t.Fail()
+		}
+
+		if rPush.Error != nil || rPush.Value != 5 {
+			t.Fail()
+		}
+
+		if rPushX.Error != nil || rPushX.Value != 6 {
+			t.Fail()
+		}
+
+		if lLen.Error != nil || lLen.Value != 6 {
+			t.Fail()
+		}
+
+		if lPop.Error != nil || lPop.Value != "1" {
+			t.Fail()
+		}
+
+		if rPop.Error != nil || rPop.Value != "6" {
+			t.Fail()
+		}
+
+		if lSet.Error != nil {
+			t.Fail()
+		}
+
+		if lInsert.Error != nil || lInsert.Value == -1 {
+			t.Fail()
+		}
+
+		if rPoplPush.Error != nil || rPoplPush.Value == "" {
+			t.Fail()
+		}
+
+		if brPoplPush.Error != nil || brPoplPush.Value == "" {
+			t.Fail()
+		}
+
+		if blPop.Error != nil || len(blPop.Value) != 2 {
+			t.Fail()
+		}
+
+		if brPop.Error != nil || len(brPop.Value) != 2 {
+			t.Fail()
+		}
+
+		if lRange.Error != nil || len(lRange.Value) <= 0 {
+			t.Fail()
+		}
+
+		if lRem.Error != nil || lRem.Value != 1 {
+			t.Fail()
+		}
+
+		if lTrim.Error != nil {
 			t.Fail()
 		}
 
