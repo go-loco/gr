@@ -13,15 +13,15 @@ func TestHashesBegin(t *testing.T) {
 
 func TestHSet(t *testing.T) {
 	test := func() {
-		if r, err := redis.HSet("gr::myhash", "father", "Darth"); err != nil || r != 1 {
+		if r, err := redis.HSet("gr::myhash", "father", "Darth"); err != nil || !r {
 			t.Fail()
 		}
 
-		if r, err := redis.HSet("gr::myhash", "father", "Darth Vader"); err != nil || r != 0 {
+		if r, err := redis.HSet("gr::myhash", "father", "Darth Vader"); err != nil || r {
 			t.Fail()
 		}
 
-		if r, err := redis.HSet("gr::myhash", "son", "Luke Skywalker"); err != nil || r != 1 {
+		if r, err := redis.HSet("gr::myhash", "son", "Luke Skywalker"); err != nil || !r {
 			t.Fail()
 		}
 	}
@@ -285,45 +285,135 @@ func TestHDel(t *testing.T) {
 	safeTestContext(test)
 }
 
+func TestHashesPipelinedFail(t *testing.T) {
+
+	safeTestContext(func() {
+
+		var hDel *gr.RespInt
+		var hMGet *gr.RespStringArray
+		var hMSet, hMSet2 *gr.RespString
+
+		err := redis.Pipelined(func(p *gr.Pipeline) {
+			hDel = p.HDel("gr::myhash")
+			hMGet = p.HMGet("gr::myhash")
+			hMSet = p.HMSet("gr::myhash")
+			hMSet2 = p.HMSet("gr::myhash", "foo")
+		})
+
+		if err == nil {
+			t.Fail()
+		}
+
+		for _, e := range err[0:2] {
+			if e != gr.NotEnoughParamsErr {
+				t.Fail()
+			}
+		}
+
+		if err[3] != gr.ParamsNotTuplesErr {
+			t.Fail()
+		}
+
+	})
+
+}
+
 func TestHashesPipelined(t *testing.T) {
 
 	safeTestContext(func() {
 
+		var hIncr *gr.RespInt
+		var hIncrFloat *gr.RespFloat
+		var hSet, hSet2, hSet3, hSetNum, hSetNum2, hSetNx *gr.RespBool
+		var hGet, hMSet *gr.RespString
+		var hGetAll *gr.RespStringArray
+
+		var hExists *gr.RespBool
+		var hKeys, hMGet, hVals *gr.RespStringArray
+		var hLen, hDel *gr.RespInt
+
 		err := redis.Pipelined(func(p *gr.Pipeline) {
-			p.HSet("gr::myhash", "father", "Darth")
+			hSet = p.HSet("gr::myhash", "father", "Darth")
 
-			p.HSet("gr::myhash", "father", "Darth Vader")
+			hSet2 = p.HSet("gr::myhash", "father", "Darth Vader")
 
-			p.HSet("gr::myhash", "son", "Luke Skywalker")
-			p.HGet("gr::myhash", "father")
-			p.HGetAll("gr::myhash")
+			hSet3 = p.HSet("gr::myhash", "son", "Luke Skywalker")
+			hGet = p.HGet("gr::myhash", "father")
+			hGetAll = p.HGetAll("gr::myhash")
 
-			p.HSet("gr::myhash", "number", "2")
-			p.HIncrBy("gr::myhash", "number", 2)
+			hSetNum = p.HSet("gr::myhash", "number", "2")
+			hIncr = p.HIncrBy("gr::myhash", "number", 2)
 
-			p.HSet("gr::myhash", "number", "4")
-			p.HIncrByFloat("gr::myhash", "number", 2.2)
+			hSetNum2 = p.HSet("gr::myhash", "number", "4")
+			hIncrFloat = p.HIncrByFloat("gr::myhash", "number", 2.2)
 
-			p.HExists("gr::myhash", "father")
+			hExists = p.HExists("gr::myhash", "father")
 
-			p.HKeys("gr::myhash")
-			p.HLen("gr::myhash")
-			//redis.HMGet("gr::myhash");
+			hKeys = p.HKeys("gr::myhash")
+			hLen = p.HLen("gr::myhash")
+			hMGet = p.HMGet("gr::myhash", "father", "son")
 
-			p.HMGet("gr::myhash", "father", "son")
+			hMSet = p.HMSet("gr::numbers", "one", "1", "two", "2")
+			hSetNx = p.HSetNx("gr::new_hash_key", "one", "1")
 
-			// redis.HMSet("gr::myhash");
-			//redis.HMSet("gr::myhash", "foo");
+			hVals = p.HVals("gr::myhash")
 
-			p.HMSet("gr::numbers", "one", "1", "two", "2")
-			p.HSetNx("gr::new_hash_key", "one", "1")
-
-			p.HVals("gr::myhash")
-
-			p.HDel("gr::myhash", "father")
+			hDel = p.HDel("gr::myhash", "father")
 		})
 
 		if err != nil {
+			t.Fail()
+		}
+
+		if hSet.Error != nil || !hSet.Value {
+			t.Fail()
+		}
+
+		if hSet2.Error != nil || hSet2.Value {
+			t.Fail()
+		}
+
+		if hSet3.Error != nil || !hSet3.Value {
+			t.Fail()
+		}
+
+		if hSetNum.Error != nil || !hSetNum.Value {
+			t.Fail()
+		}
+
+		if hSetNum2.Error != nil || hSetNum2.Value {
+			t.Fail()
+		}
+
+		if hExists.Error != nil || !hExists.Value {
+			t.Fail()
+		}
+
+		if hKeys.Error != nil || len(hKeys.Value) < 1 {
+			t.Fail()
+		}
+
+		if hLen.Error != nil || hLen.Value < 1 {
+			t.Fail()
+		}
+
+		if hMGet.Error != nil || len(hMGet.Value) < 1 {
+			t.Fail()
+		}
+
+		if hMSet.Error != nil || hMSet.Value != "OK" {
+			t.Fail()
+		}
+
+		if hSetNx.Error != nil || !hSetNx.Value {
+			t.Fail()
+		}
+
+		if hVals.Error != nil || len(hVals.Value) < 1 {
+			t.Fail()
+		}
+
+		if hDel.Error != nil || hDel.Value != 1 {
 			t.Fail()
 		}
 

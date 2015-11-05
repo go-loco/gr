@@ -11,3 +11,11 @@ func rExec() [][]byte {
 func rDiscard() [][]byte {
 	return multiCompile("DISCARD")
 }
+
+func rWatch() [][]byte {
+	return multiCompile("WATCH")
+}
+
+func rUnWatch() [][]byte {
+	return multiCompile("UNWATCH")
+}

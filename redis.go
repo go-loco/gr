@@ -624,8 +624,8 @@ func (r *Redis) HMSet(key string, fieldValues ...string) (string, error) {
 	return r.writeReadStr(rs)
 }
 
-func (r *Redis) HSet(key string, field string, value string) (int64, error) {
-	return r.writeReadInt(rHSet(key, field, value))
+func (r *Redis) HSet(key string, field string, value string) (bool, error) {
+	return r.writeReadBool(rHSet(key, field, value))
 }
 
 func (r *Redis) HSetNx(key string, field string, value string) (bool, error) {

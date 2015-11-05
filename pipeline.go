@@ -565,8 +565,8 @@ func (p *Pipeline) HMSet(key string, fieldValues ...string) *RespString {
 	return p.enqueueStr(rs)
 }
 
-func (p *Pipeline) HSet(key string, field string, value string) *RespInt {
-	return p.enqueueInt(rHSet(key, field, value))
+func (p *Pipeline) HSet(key string, field string, value string) *RespBool {
+	return p.enqueueBool(rHSet(key, field, value))
 }
 
 func (p *Pipeline) HSetNx(key string, field string, value string) *RespBool {
