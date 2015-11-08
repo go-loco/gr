@@ -647,6 +647,37 @@ func (r *Redis) HScan(key string, cursor int, scanParams *ScanParams) (int64, []
 	return scanGeneric(s, err)
 }
 
+////////
+//HYPERLOGLOG
+///////
+
+func (r *Redis) PFAdd(key string, elements ...string) (int64, error) {
+	rs, err := rPFAdd(key, elements...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) PFCount(keys ...string) (int64, error) {
+	rs, err := rPFCount(keys...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+func (r *Redis) PFMerge(destkey string, sourcekeys ...string) (string, error) {
+	rs, err := rPFMerge(destkey, sourcekeys...)
+	if err != nil {
+		return "", err
+	}
+
+	return r.writeReadStr(rs)
+}
+
 /////
 ////
 
