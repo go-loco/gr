@@ -586,6 +586,43 @@ func (p *Pipeline) HVals(key string) *RespStringArray {
 //HScan
 
 ////////
+//HYPERLOGLOG
+///////
+
+func (p *Pipeline) PFAdd(key string, elements ...string) *RespInt {
+
+	rs, err := rPFAdd(key, elements...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) PFCount(keys ...string) *RespInt {
+
+	rs, err := rPFCount(keys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueInt(rs)
+}
+
+func (p *Pipeline) PFMerge(destkey string, sourcekeys ...string) *RespString {
+
+	rs, err := rPFMerge(destkey, sourcekeys...)
+	if err != nil {
+		p.err = append(p.err, err)
+		return nil
+	}
+
+	return p.enqueueStr(rs)
+}
+
+////////
 //CONNECTION
 ///////
 
