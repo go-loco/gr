@@ -11,7 +11,7 @@ type Pipeline struct {
 	cmdsQueue queue
 	respQueue queue
 	redis     *Redis
-	err       []error
+	err       error
 }
 
 //////////
@@ -28,19 +28,20 @@ func (p *Pipeline) Discard() *RespString {
 	return p.enqueueStr(rDiscard())
 }
 
+func (p *Pipeline) Watch() *RespString {
+	return p.enqueueStr(rWatch())
+}
+
+func (p *Pipeline) UnWatch() *RespString {
+	return p.enqueueStr(rUnWatch())
+}
+
 ////////
 //KEYS
 ///////
 
 func (p *Pipeline) Del(keys ...string) *RespInt {
-
-	rs, err := rDel(keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rDel(keys...))
 }
 
 func (p *Pipeline) Dump(key string) *RespString {
@@ -163,14 +164,7 @@ func (p *Pipeline) BitCount(key string) *RespInt {
 }
 
 func (p *Pipeline) BitOp(bitOperation BitOperation, destKey string, keys ...string) *RespInt {
-
-	rs, err := rBitOp(bitOperation, destKey, keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rBitOp(bitOperation, destKey, keys...))
 }
 
 //TODO: agregar verificacion start end
@@ -200,14 +194,7 @@ func (p *Pipeline) Set(key string, value string) *RespString {
 
 //TODO agregar verificacion
 func (p *Pipeline) SetX(key string, value string, keyExpiration *KeyExpiration, keyExistance *KeyExistance) *RespString {
-
-	rs, err := rSetX(key, value, keyExpiration, keyExistance)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStr(rs)
+	return p.enqueueStrErr(rSetX(key, value, keyExpiration, keyExistance))
 }
 
 func (p *Pipeline) Incr(key string) *RespInt {
@@ -231,36 +218,15 @@ func (p *Pipeline) DecrBy(key string, decrement int) *RespInt {
 }
 
 func (p *Pipeline) MGet(keys ...string) *RespStringArray {
-
-	rs, err := rMGet(keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStrArray(rs)
+	return p.enqueueStrArrayErr(rMGet(keys...))
 }
 
 func (p *Pipeline) MSet(keyValues ...string) *RespString {
-
-	rs, err := rMSet(keyValues...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStr(rs)
+	return p.enqueueStrErr(rMSet(keyValues...))
 }
 
 func (p *Pipeline) MSetNx(keyValues ...string) *RespBool {
-
-	rs, err := rMSetNx(keyValues...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueBool(rs)
+	return p.enqueueBoolErr(rMSetNx(keyValues...))
 }
 
 func (p *Pipeline) PSetEx(key string, milliseconds int, value string) *RespString {
@@ -300,14 +266,7 @@ func (p *Pipeline) LIndex(key string, index int) *RespString {
 }
 
 func (p *Pipeline) LPush(key string, values ...string) *RespInt {
-
-	rs, err := rLPush(key, values...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rLPush(key, values...))
 }
 
 func (p *Pipeline) LPushX(key string, value string) *RespInt {
@@ -315,14 +274,7 @@ func (p *Pipeline) LPushX(key string, value string) *RespInt {
 }
 
 func (p *Pipeline) RPush(key string, values ...string) *RespInt {
-
-	rs, err := rRPush(key, values...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rRPush(key, values...))
 }
 
 func (p *Pipeline) RPushX(key string, value string) *RespInt {
@@ -342,14 +294,7 @@ func (p *Pipeline) LSet(key string, index int, value string) *RespString {
 }
 
 func (p *Pipeline) LInsert(key string, location InsertLocation, pivot string, value string) *RespInt {
-
-	rs, err := rLInsert(key, location, pivot, value)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rLInsert(key, location, pivot, value))
 }
 
 func (p *Pipeline) LRange(key string, start int, stop int) *RespStringArray {
@@ -369,25 +314,11 @@ func (p *Pipeline) RPopLPush(source string, destination string) *RespString {
 }
 
 func (p *Pipeline) BLPop(timeout int, keys ...string) *RespStringArray {
-
-	rs, err := rBLPop(timeout, keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStrArray(rs)
+	return p.enqueueStrArrayErr(rBLPop(timeout, keys...))
 }
 
 func (p *Pipeline) BRPop(timeout int, keys ...string) *RespStringArray {
-
-	rs, err := rBRPop(timeout, keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStrArray(rs)
+	return p.enqueueStrArrayErr(rBRPop(timeout, keys...))
 }
 
 func (p *Pipeline) BRPopLPush(source string, destination string, timeout int) *RespString {
@@ -399,13 +330,7 @@ func (p *Pipeline) BRPopLPush(source string, destination string, timeout int) *R
 //////
 
 func (p *Pipeline) SAdd(key string, values ...string) *RespInt {
-	rs, err := rSAdd(key, values...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rSAdd(key, values...))
 }
 
 func (p *Pipeline) SCard(key string) *RespInt {
@@ -413,43 +338,19 @@ func (p *Pipeline) SCard(key string) *RespInt {
 }
 
 func (p *Pipeline) SDiff(keys ...string) *RespStringArray {
-	rs, err := rSDiff(keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStrArray(rs)
+	return p.enqueueStrArrayErr(rSDiff(keys...))
 }
 
 func (p *Pipeline) SDiffStore(key string, keys ...string) *RespInt {
-	rs, err := rSDiffStore(key, keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rSDiffStore(key, keys...))
 }
 
 func (p *Pipeline) SInter(keys ...string) *RespStringArray {
-	rs, err := rSInter(keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStrArray(rs)
+	return p.enqueueStrArrayErr(rSInter(keys...))
 }
 
 func (p *Pipeline) SInterStore(key string, keys ...string) *RespInt {
-	rs, err := rSInterStore(key, keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rSInterStore(key, keys...))
 }
 
 func (p *Pipeline) SIsMember(key string, value string) *RespBool {
@@ -473,33 +374,15 @@ func (p *Pipeline) SRandMember(key string, count int) *RespStringArray {
 }
 
 func (p *Pipeline) SRem(key string, values ...string) *RespInt {
-	rs, err := rSRem(key, values...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rSRem(key, values...))
 }
 
 func (p *Pipeline) SUnion(keys ...string) *RespStringArray {
-	rs, err := rSUnion(keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStrArray(rs)
+	return p.enqueueStrArrayErr(rSUnion(keys...))
 }
 
 func (p *Pipeline) SUnionStore(key string, keys ...string) *RespInt {
-	rs, err := rSUnionStore(key, keys...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rSUnionStore(key, keys...))
 }
 
 ////////
@@ -507,14 +390,7 @@ func (p *Pipeline) SUnionStore(key string, keys ...string) *RespInt {
 ///////
 
 func (p *Pipeline) HDel(key string, fields ...string) *RespInt {
-
-	rs, err := rHDel(key, fields...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueInt(rs)
+	return p.enqueueIntErr(rHDel(key, fields...))
 }
 
 func (p *Pipeline) HExists(key string, field string) *RespBool {
@@ -546,23 +422,11 @@ func (p *Pipeline) HLen(key string) *RespInt {
 }
 
 func (p *Pipeline) HMGet(key string, fields ...string) *RespStringArray {
-	rs, err := rHMGet(key, fields...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStrArray(rs)
+	return p.enqueueStrArrayErr(rHMGet(key, fields...))
 }
 
 func (p *Pipeline) HMSet(key string, fieldValues ...string) *RespString {
-	rs, err := rHMSet(key, fieldValues...)
-	if err != nil {
-		p.err = append(p.err, err)
-		return nil
-	}
-
-	return p.enqueueStr(rs)
+	return p.enqueueStrErr(rHMSet(key, fieldValues...))
 }
 
 func (p *Pipeline) HSet(key string, field string, value string) *RespBool {
@@ -596,7 +460,7 @@ func (p *Pipeline) Select(index uint) *RespString {
 ///////
 ///////
 
-func (p *Pipeline) enqueueResp(cmds [][]byte, rs Response) {
+func (p *Pipeline) enqueueResp(cmds [][]byte, rs Response, err error) {
 
 	p.cmdsQueue.enqueue(cmds)
 	p.respQueue.enqueue(rs)
@@ -605,39 +469,79 @@ func (p *Pipeline) enqueueResp(cmds [][]byte, rs Response) {
 		p.cmdsSize += len(c)
 	}
 
+	if err != nil {
+		rs.setErr(err)
+		p.err = PipelineInputErr
+	}
+
 }
 
 func (p *Pipeline) enqueueStr(cmds [][]byte) *RespString {
 	rs := new(RespString)
-	p.enqueueResp(cmds, rs)
+	p.enqueueResp(cmds, rs, nil)
 
 	return rs
 }
 
 func (p *Pipeline) enqueueStrArray(cmds [][]byte) *RespStringArray {
 	rs := new(RespStringArray)
-	p.enqueueResp(cmds, rs)
+	p.enqueueResp(cmds, rs, nil)
 
 	return rs
 }
 
 func (p *Pipeline) enqueueInt(cmds [][]byte) *RespInt {
 	rs := new(RespInt)
-	p.enqueueResp(cmds, rs)
+	p.enqueueResp(cmds, rs, nil)
 
 	return rs
 }
 
 func (p *Pipeline) enqueueFloat(cmds [][]byte) *RespFloat {
 	rs := new(RespFloat)
-	p.enqueueResp(cmds, rs)
+	p.enqueueResp(cmds, rs, nil)
 
 	return rs
 }
 
 func (p *Pipeline) enqueueBool(cmds [][]byte) *RespBool {
 	rs := new(RespBool)
-	p.enqueueResp(cmds, rs)
+	p.enqueueResp(cmds, rs, nil)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueStrErr(cmds [][]byte, err error) *RespString {
+	rs := new(RespString)
+	p.enqueueResp(cmds, rs, err)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueStrArrayErr(cmds [][]byte, err error) *RespStringArray {
+	rs := new(RespStringArray)
+	p.enqueueResp(cmds, rs, err)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueIntErr(cmds [][]byte, err error) *RespInt {
+	rs := new(RespInt)
+	p.enqueueResp(cmds, rs, err)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueFloatErr(cmds [][]byte, err error) *RespFloat {
+	rs := new(RespFloat)
+	p.enqueueResp(cmds, rs, err)
+
+	return rs
+}
+
+func (p *Pipeline) enqueueBoolErr(cmds [][]byte, err error) *RespBool {
+	rs := new(RespBool)
+	p.enqueueResp(cmds, rs, err)
 
 	return rs
 }
@@ -686,7 +590,7 @@ func (p *Pipeline) execute() (err error) {
 		var rr *redisResponse
 		rr, err = read(reader)
 		if err == nil {
-			resp.set(rr)
+			resp.read(rr)
 		}
 
 	}

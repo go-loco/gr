@@ -289,29 +289,40 @@ func TestListsPipelinedFailed(t *testing.T) {
 
 	safeTestContext(func() {
 
+		var lPush, rPush, lInsert *gr.RespInt
+		var bLPop, bRPop *gr.RespStringArray
+
 		//NotEnoughParamsErr
 		err := redis.Pipelined(func(p *gr.Pipeline) {
-			p.LPush("gr::mylist")
-			p.RPush("gr::mylist")
-			p.BLPop(0)
-			p.BRPop(0)
+			lPush = p.LPush("gr::mylist")
+			rPush = p.RPush("gr::mylist")
+			bLPop = p.BLPop(0)
+			bRPop = p.BRPop(0)
+			lInsert = p.LInsert("gr::mylist", 3, "foo", "foo")
 		})
 
-		for _, e := range err {
-			if e != gr.NotEnoughParamsErr {
-				t.Fail()
-			}
+		if err == nil {
+			t.Fail()
 		}
 
-		//ParamErr
-		err = redis.Pipelined(func(p *gr.Pipeline) {
-			p.LInsert("gr::mylist", 3, "foo", "foo")
-		})
+		if lPush.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
 
-		for _, e := range err {
-			if e != gr.ParamErr {
-				t.Fail()
-			}
+		if rPush.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if bLPop.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if bRPop.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if lInsert.Error != gr.ParamErr {
+			t.Fail()
 		}
 
 	})

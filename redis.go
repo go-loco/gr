@@ -53,25 +53,27 @@ var (
 	ParamErr           = errors.New("Error in parameters")
 	NotEnoughParamsErr = errors.New("Not enough parameters")
 	ParamsNotTuplesErr = errors.New("Parameters must be tuples (x,y)")
+	PipelineInputErr   = errors.New("")
 )
 
-func (r *Redis) Pipelined(caller func(*Pipeline)) []error {
+func (r *Redis) Pipelined(caller func(*Pipeline)) error {
 
 	p := &Pipeline{
 		cmdsQueue: queue{},
 		respQueue: queue{},
 		redis:     r,
-		err:       make([]error, 0, 3),
 	}
 
 	caller(p)
 
-	if len(p.err) > 0 {
+	//Input errors
+	if p.err != nil {
 		return p.err
 	}
 
+	//Exec errors
 	if err := p.execute(); err != nil {
-		return []error{err}
+		return err
 	}
 
 	return nil

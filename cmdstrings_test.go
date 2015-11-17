@@ -452,33 +452,51 @@ func TestStrLen(t *testing.T) {
 
 func TestStringsPipelinedFailed(t *testing.T) {
 
+	var setX, mSet *gr.RespString
+	var bitOp, bitOp2 *gr.RespInt
+	var mGet *gr.RespStringArray
+	var mSetNx *gr.RespBool
+
 	safeTestContext(func() {
 
 		err := redis.Pipelined(func(p *gr.Pipeline) {
 			k := gr.KeyExpiration{2, 3}
 			q := gr.MustExist
-			p.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
+			setX = p.SetX("gr::A-Key-That-Not-Exists", "THE VALUE", &k, &q)
 
-			p.BitOp(10, "gr::one", "gr::two")
+			bitOp = p.BitOp(10, "gr::one", "gr::two")
+			bitOp2 = p.BitOp(gr.AND, "gr::one")
+			mGet = p.MGet()
+			mSet = p.MSet()
+			mSetNx = p.MSetNx()
 		})
 
-		for _, e := range err {
-			if e != gr.ParamErr {
-				t.Fail()
-			}
+		if err == nil {
+			t.Fail()
 		}
 
-		err = redis.Pipelined(func(p *gr.Pipeline) {
-			p.BitOp(gr.AND, "gr::one")
-			p.MGet()
-			p.MSet()
-			p.MSetNx()
-		})
+		if setX.Error != gr.ParamErr {
+			t.Fail()
+		}
 
-		for _, e := range err {
-			if e != gr.NotEnoughParamsErr {
-				t.Fail()
-			}
+		if bitOp.Error != gr.ParamErr {
+			t.Fail()
+		}
+
+		if bitOp2.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if mGet.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if mSet.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if mSetNx.Error != gr.NotEnoughParamsErr {
+			t.Fail()
 		}
 
 	})

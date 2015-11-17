@@ -18,6 +18,7 @@ func rLIndex(key string, index int) [][]byte {
 }
 
 func rLPush(key string, values ...string) ([][]byte, error) {
+
 	if len(values) < 1 {
 		return nil, NotEnoughParamsErr
 	}

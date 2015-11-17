@@ -6,6 +6,7 @@ import (
 )
 
 func rHDel(key string, fields ...string) ([][]byte, error) {
+
 	if len(fields) < 1 {
 		return nil, NotEnoughParamsErr
 	}
