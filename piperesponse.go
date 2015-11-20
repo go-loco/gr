@@ -1,6 +1,6 @@
 package gr
 
-type Response interface {
+type pipelineResponse interface {
 	read(*redisResponse)
 	setErr(error)
 }

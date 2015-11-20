@@ -14,26 +14,12 @@ type Pipeline struct {
 	err       error
 }
 
-//////////
-//TRANSACTION
-func (p *Pipeline) Multi() *RespString {
-	return p.enqueueStr(rMulti())
-}
-
-func (p *Pipeline) Exec() *RespString {
-	return p.enqueueStr(rExec())
-}
-
-func (p *Pipeline) Discard() *RespString {
-	return p.enqueueStr(rDiscard())
-}
-
-func (p *Pipeline) Watch() *RespString {
-	return p.enqueueStr(rWatch())
-}
-
-func (p *Pipeline) UnWatch() *RespString {
-	return p.enqueueStr(rUnWatch())
+func newPipeline(r *Redis) *Pipeline {
+	return &Pipeline{
+		cmdsQueue: queue{},
+		respQueue: queue{},
+		redis:     r,
+	}
 }
 
 ////////
@@ -449,9 +435,9 @@ func (p *Pipeline) HVals(key string) *RespStringArray {
 
 //HScan
 
-////////
+/////////////
 //CONNECTION
-///////
+////////////
 
 func (p *Pipeline) Select(index uint) *RespString {
 	return p.enqueueStr(rSelect(index))
@@ -460,7 +446,7 @@ func (p *Pipeline) Select(index uint) *RespString {
 ///////
 ///////
 
-func (p *Pipeline) enqueueResp(cmds [][]byte, rs Response, err error) {
+func (p *Pipeline) enqueueResp(cmds [][]byte, rs pipelineResponse, err error) {
 
 	p.cmdsQueue.enqueue(cmds)
 	p.respQueue.enqueue(rs)
@@ -546,8 +532,15 @@ func (p *Pipeline) enqueueBoolErr(cmds [][]byte, err error) *RespBool {
 	return rs
 }
 
-func (p *Pipeline) execute() (err error) {
+func (p *Pipeline) execute(multi bool) (err error) {
 
+	///////////////
+	//Input errors = return!
+	if p.err != nil {
+		return p.err
+	}
+
+	//Get a connection
 	conn := p.redis.pool.get()
 	defer p.cleanConn(conn)
 
@@ -561,8 +554,14 @@ func (p *Pipeline) execute() (err error) {
 		return nil
 	}
 
+	//MULTI = call "EXEC" command
+	if multi {
+		p.enqueueStrArray(rExec())
+	}
+
 	writer := bufio.NewWriterSize(conn, p.cmdsSize)
 	for cmd := cmdDeq(); cmd != nil; cmd = cmdDeq() {
+		//debugCmds(cmd)
 		err = write(cmd, writer)
 		if err != nil {
 			return
@@ -577,20 +576,49 @@ func (p *Pipeline) execute() (err error) {
 	////////////////
 	//READ RESPONSE
 	//////////////
-	respDeq := func() Response {
-		if c, ok := p.respQueue.dequeue().(Response); ok {
+	respDeq := func() pipelineResponse {
+		if c, ok := p.respQueue.dequeue().(pipelineResponse); ok {
 			return c
 		}
 		return nil
 	}
 
+	var multiResp *redisResponse
 	reader := bufio.NewReader(conn)
-	for resp := respDeq(); resp != nil; resp = respDeq() {
 
-		var rr *redisResponse
-		rr, err = read(reader)
-		if err == nil {
-			resp.read(rr)
+	if multi {
+		if q0, err := readString(read(reader)); q0 != "OK" || err != nil {
+			println("FALLO Q0")
+		}
+
+		for i := 1; i < p.respQueue.size-1; i++ {
+			if q, err := readString(read(reader)); q != "QUEUED" || err != nil {
+				//error salir!
+				println("FALLO Q1")
+			}
+		}
+
+		//Leer el ultimo readstringarray
+		respDeq()
+		if multiResp, err = read(reader); err != nil {
+			return
+		}
+	}
+
+	for pipeResp := respDeq(); pipeResp != nil; pipeResp = respDeq() {
+
+		if multi {
+			//fmt.Println(string(multiResp.resp))
+			//fmt.Println(string(multiResp.redisType))
+
+			pipeResp.read(multiResp)
+			multiResp = multiResp.next
+
+		} else {
+			rr, err := read(reader)
+			if err == nil {
+				pipeResp.read(rr)
+			}
 		}
 
 	}

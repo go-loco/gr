@@ -56,33 +56,33 @@ var (
 	PipelineInputErr   = errors.New("")
 )
 
+/////////////
+//PIPELINING
+////////////
+
 func (r *Redis) Pipelined(caller func(*Pipeline)) error {
 
-	p := &Pipeline{
-		cmdsQueue: queue{},
-		respQueue: queue{},
-		redis:     r,
-	}
-
+	p := newPipeline(r)
 	caller(p)
 
-	//Input errors
-	if p.err != nil {
-		return p.err
-	}
-
-	//Exec errors
-	if err := p.execute(); err != nil {
-		return err
-	}
-
-	return nil
-
+	return p.execute(false)
 }
 
-////////
+//////////////
+//TRANSACTION
+/////////////
+
+func (r *Redis) Multi(caller func(*Transaction)) error {
+
+	t := newTransaction(r)
+	caller(t)
+
+	return t.execute(true)
+}
+
+//////////
 //PUBSUB
-///////
+/////////
 
 func (r *Redis) Publish(channel string, message string) (int64, error) {
 	return r.writeReadInt(rPublish(channel, message))
