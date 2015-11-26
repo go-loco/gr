@@ -1,8 +1,5 @@
 package gr
 
-import (
-)
-
 func rPFAdd(key string, elements ...string) ([][]byte, error) {
 	if len(elements) < 1 {
 		return nil, NotEnoughParamsErr
@@ -11,7 +8,6 @@ func rPFAdd(key string, elements ...string) ([][]byte, error) {
 	cmds := append([]string{"PFADD", key}, elements...)
 	return multiCompile(cmds...), nil
 }
-
 
 func rPFCount(keys ...string) ([][]byte, error) {
 	if len(keys) < 1 {
