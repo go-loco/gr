@@ -304,13 +304,19 @@ func TestHashesPipelinedFail(t *testing.T) {
 			t.Fail()
 		}
 
-		for _, e := range err[0:2] {
-			if e != gr.NotEnoughParamsErr {
-				t.Fail()
-			}
+		if hDel.Error != gr.NotEnoughParamsErr {
+			t.Fail()
 		}
 
-		if err[3] != gr.ParamsNotTuplesErr {
+		if hMGet.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if hMSet.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if hMSet2.Error != gr.ParamsNotTuplesErr {
 			t.Fail()
 		}
 

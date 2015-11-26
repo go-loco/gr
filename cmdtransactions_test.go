@@ -17,11 +17,9 @@ func TestTransaction(t *testing.T) {
 
 		var get *gr.RespString
 
-		err := redis.Pipelined(func(p *gr.Pipeline) {
-			p.Multi()
-			p.Set("gr::multikey", "multivalue")
-			get = p.Get("gr::multikey")
-			p.Exec()
+		err := redis.Multi(func(m *gr.Transaction) {
+			m.Set("gr::multikey", "multivalue")
+			get = m.Get("gr::multikey")
 		})
 
 		if err != nil {

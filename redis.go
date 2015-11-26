@@ -53,34 +53,36 @@ var (
 	ParamErr           = errors.New("Error in parameters")
 	NotEnoughParamsErr = errors.New("Not enough parameters")
 	ParamsNotTuplesErr = errors.New("Parameters must be tuples (x,y)")
+	PipelineInputErr   = errors.New("")
 )
 
-func (r *Redis) Pipelined(caller func(*Pipeline)) []error {
+/////////////
+//PIPELINING
+////////////
 
-	p := &Pipeline{
-		cmdsQueue: queue{},
-		respQueue: queue{},
-		redis:     r,
-		err:       make([]error, 0, 3),
-	}
+func (r *Redis) Pipelined(caller func(*Pipeline)) error {
 
+	p := newPipeline(r)
 	caller(p)
 
-	if len(p.err) > 0 {
-		return p.err
-	}
-
-	if err := p.execute(); err != nil {
-		return []error{err}
-	}
-
-	return nil
-
+	return p.execute(false)
 }
 
-////////
+//////////////
+//TRANSACTION
+/////////////
+
+func (r *Redis) Multi(caller func(*Transaction)) error {
+
+	t := newTransaction(r)
+	caller(t)
+
+	return t.execute(true)
+}
+
+//////////
 //PUBSUB
-///////
+/////////
 
 func (r *Redis) Publish(channel string, message string) (int64, error) {
 	return r.writeReadInt(rPublish(channel, message))
@@ -647,9 +649,9 @@ func (r *Redis) HScan(key string, cursor int, scanParams *ScanParams) (int64, []
 	return scanGeneric(s, err)
 }
 
-////////
+/////////////
 //HYPERLOGLOG
-///////
+/////////////
 
 func (r *Redis) PFAdd(key string, elements ...string) (int64, error) {
 	rs, err := rPFAdd(key, elements...)

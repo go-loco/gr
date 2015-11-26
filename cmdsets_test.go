@@ -313,22 +313,55 @@ func TestSUnionStore(t *testing.T) {
 
 func TestSetsPipelinedFailed(t *testing.T) {
 
+	var sAdd, sDiffStore, sInterStore, sRem, sUnionStore *gr.RespInt
+	var sDiff, sInter, sUnion *gr.RespStringArray
+
 	safeTestContext(func() {
 		err := redis.Pipelined(func(p *gr.Pipeline) {
-			p.SAdd("gr::myset")
-			p.SDiff("gr::myset")
-			p.SDiffStore("gr::myresultset", "gr::myset")
-			p.SInter("gr::myset")
-			p.SInterStore("gr::myresultset", "gr::myset")
-			p.SRem("gr::myset")
-			p.SUnion("gr::myset")
-			p.SUnionStore("gr::myresultset", "gr::myset")
+			sAdd = p.SAdd("gr::myset")
+			sDiff = p.SDiff("gr::myset")
+			sDiffStore = p.SDiffStore("gr::myresultset", "gr::myset")
+			sInter = p.SInter("gr::myset")
+			sInterStore = p.SInterStore("gr::myresultset", "gr::myset")
+			sRem = p.SRem("gr::myset")
+			sUnion = p.SUnion("gr::myset")
+			sUnionStore = p.SUnionStore("gr::myresultset", "gr::myset")
 		})
 
-		for _, e := range err {
-			if e != gr.NotEnoughParamsErr {
-				t.Fail()
-			}
+		if err == nil {
+			t.Fail()
+		}
+
+		if sAdd.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if sDiff.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if sDiffStore.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if sInter.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if sInterStore.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if sRem.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if sUnion.Error != gr.NotEnoughParamsErr {
+			t.Fail()
+		}
+
+		if sUnionStore.Error != gr.NotEnoughParamsErr {
+			t.Fail()
 		}
 
 	})
