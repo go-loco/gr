@@ -681,7 +681,43 @@ func (r *Redis) PFMerge(destkey string, sourcekeys ...string) (string, error) {
 }
 
 /////
-////
+//GEO
+/////
+
+//GeoAdd Adds the specified geospatial items (latitude, longitude, name) to the specified key
+func (r *Redis) GeoAdd(key string, fields ...string) (int64, error) {
+	rs, err := rGeoAdd(key, fields...)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.writeReadInt(rs)
+}
+
+//GeoDist Return the distance between two members in the geospatial index represented by the sorted set.
+func (r *Redis) GeoDist(key string, member1 string, member2 string, unit string) (string, error) {
+	dist, err := rGeoDist(key, member1, member2, unit)
+	if err != nil {
+		return "", err
+	}
+	return r.writeReadStr(dist)
+}
+
+//GeoHash return valid Geohash strings representing the position of one or more elements 
+//in a sorted set value representing a geospatial index (where elements were added using GEOADD).
+func (r *Redis) GeoHash(key string, fields ...string) ([]string, error) {
+	rs, err := rGeoHash(key, fields...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadStrArray(rs)
+}
+
+
+/////////
+//Helpers
+/////////
 
 func (r *Redis) writeReadGeneric(cmds [][]byte) (result *redisResponse, err error) {
 
