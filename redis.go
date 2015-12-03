@@ -703,7 +703,7 @@ func (r *Redis) GeoDist(key string, member1 string, member2 string, unit string)
 	return r.writeReadStr(dist)
 }
 
-//GeoHash return valid Geohash strings representing the position of one or more elements 
+//GeoHash return valid Geohash strings representing the position of one or more elements
 //in a sorted set value representing a geospatial index (where elements were added using GEOADD).
 func (r *Redis) GeoHash(key string, fields ...string) ([]string, error) {
 	rs, err := rGeoHash(key, fields...)
@@ -714,6 +714,16 @@ func (r *Redis) GeoHash(key string, fields ...string) ([]string, error) {
 	return r.writeReadStrArray(rs)
 }
 
+//GeoPos return the positions (longitude,latitude) of all the specified members
+//of the geospatial index represented by the sorted set at key.
+func (r *Redis) GeoPos(key string, fields ...string) ([]string, error) {
+	rs, err := rGeoPos(key, fields...)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.writeReadStrArray(rs)
+}
 
 /////////
 //Helpers
