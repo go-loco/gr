@@ -563,9 +563,28 @@ func (p *Pipeline) execute(multi bool) (err error) {
 	conn := p.redis.pool.get()
 	defer p.cleanConn(conn)
 
+	//MULTI = call "EXEC" command
+	if multi {
+		p.enqueueStrArray(rExec())
+	}
+
 	////////////////
 	//WRITE COMMANDS
-	//////////////
+	if err = p.writeExecute(conn); err != nil {
+		return
+	}
+
+	if multi {
+		err = p.readExecuteMulti(conn)
+	} else {
+		err = p.readExecute(conn)
+	}
+
+	return
+}
+
+func (p *Pipeline) writeExecute(conn *net.TCPConn) (err error) {
+
 	cmdDeq := func() [][]byte {
 		if c, ok := p.cmdsQueue.dequeue().([][]byte); ok {
 			return c
@@ -573,14 +592,8 @@ func (p *Pipeline) execute(multi bool) (err error) {
 		return nil
 	}
 
-	//MULTI = call "EXEC" command
-	if multi {
-		p.enqueueStrArray(rExec())
-	}
-
 	writer := bufio.NewWriterSize(conn, p.cmdsSize)
 	for cmd := cmdDeq(); cmd != nil; cmd = cmdDeq() {
-		//debugCmds(cmd)
 		err = write(cmd, writer)
 		if err != nil {
 			return
@@ -588,62 +601,63 @@ func (p *Pipeline) execute(multi bool) (err error) {
 	}
 
 	err = writer.Flush()
-	if err != nil {
-		return
-	}
 
-	////////////////
-	//READ RESPONSE
-	//////////////
-	respDeq := func() pipelineResponse {
-		if c, ok := p.respQueue.dequeue().(pipelineResponse); ok {
-			return c
-		}
-		return nil
-	}
+	return
 
-	var multiResp *redisResponse
+}
+
+func (p *Pipeline) respDeq() pipelineResponse {
+	if c, ok := p.respQueue.dequeue().(pipelineResponse); ok {
+		return c
+	}
+	return nil
+}
+
+func (p *Pipeline) readExecute(conn *net.TCPConn) (err error) {
+
 	reader := bufio.NewReader(conn)
 
-	if multi {
-		if q0, err := readString(read(reader)); q0 != "OK" || err != nil {
-			println("FALLO Q0")
-		}
+	for pipeResp := p.respDeq(); pipeResp != nil; pipeResp = p.respDeq() {
 
-		for i := 1; i < p.respQueue.size-1; i++ {
-			if q, err := readString(read(reader)); q != "QUEUED" || err != nil {
-				//error salir!
-				println("FALLO Q1")
-			}
-		}
-
-		//Leer el ultimo readstringarray
-		respDeq()
-		if multiResp, err = read(reader); err != nil {
-			return
-		}
-	}
-
-	for pipeResp := respDeq(); pipeResp != nil; pipeResp = respDeq() {
-
-		if multi {
-			//fmt.Println(string(multiResp.resp))
-			//fmt.Println(string(multiResp.redisType))
-
-			pipeResp.read(multiResp)
-			multiResp = multiResp.next
-
-		} else {
-			rr, err := read(reader)
-			if err == nil {
-				pipeResp.read(rr)
-			}
+		rr, err := read(reader)
+		if err == nil {
+			pipeResp.read(rr)
 		}
 
 	}
 
 	return
+}
 
+func (p *Pipeline) readExecuteMulti(conn *net.TCPConn) (err error) {
+
+	var multiResp *redisResponse
+	reader := bufio.NewReader(conn)
+
+	if q0, err := readString(read(reader)); q0 != "OK" || err != nil {
+		return err
+	}
+
+	for i := 1; i < p.respQueue.size-1; i++ {
+		if q, err := readString(read(reader)); q != "QUEUED" || err != nil {
+			return err
+		}
+	}
+
+	//Read response from "exec" command from multi
+	if multiResp, err = read(reader); err != nil {
+		return
+	}
+
+	//Dequeue de first element which is "multi"
+	p.respDeq()
+
+	//Dequeue all elements but not the last one (which is "exec")
+	for i := 0; i < p.respQueue.size-2; i++ {
+		p.respDeq().read(multiResp.elements[i])
+	}
+
+	return
 }
 
 func (p *Pipeline) cleanConn(conn *net.TCPConn) {

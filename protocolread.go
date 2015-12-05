@@ -22,13 +22,12 @@ func readStringArray(rr *redisResponse, err error) ([]string, error) {
 
 	if err == nil {
 
-		str := make([]string, 0, rr.arraySize)
-		nextResponse := rr.next
+		str := make([]string, 0, len(rr.elements))
 
-		for i := 0; i < rr.arraySize; i++ {
-			if nextResponse.redisType == tArray {
+		for i := 0; i < len(rr.elements); i++ {
+			if rr.elements[i].redisType == tArray {
 
-				s, err := readStringArray(nextResponse, err)
+				s, err := readStringArray(rr.elements[i], err)
 				if err != nil {
 					break
 				}
@@ -36,8 +35,7 @@ func readStringArray(rr *redisResponse, err error) ([]string, error) {
 				str = append(str, s...)
 
 			} else {
-				str = append(str, string(nextResponse.resp))
-				nextResponse = nextResponse.next
+				str = append(str, string(rr.elements[i].resp))
 			}
 
 		}
@@ -77,8 +75,7 @@ func readBool(rr *redisResponse, err error) (bool, error) {
 type redisResponse struct {
 	resp      []byte
 	redisType byte
-	arraySize int
-	next      *redisResponse
+	elements  []*redisResponse
 }
 
 func read(reader *bufio.Reader) (reply *redisResponse, err error) {
@@ -106,15 +103,14 @@ func read(reader *bufio.Reader) (reply *redisResponse, err error) {
 			if size, err = readSize(line); err == nil {
 
 				reply.redisType = tArray
-				reply.arraySize = size
-				tail := reply
+				reply.elements = make([]*redisResponse, size)
 
 				for i := 0; i < size; i++ {
-					if tail.next, err = read(reader); err != nil {
+					if reply.elements[i], err = read(reader); err != nil {
 						break
 					}
-					tail = tail.next
 				}
+
 			}
 
 		} //end switch
